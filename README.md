@@ -3,25 +3,28 @@
 Second go.
 
 -   UI framework wraps entire frontend, not just specific parts. Embed the 'fridge' as a component.
--   MongoDB for database. (Or open-source alternative? Or Postgres?)
+-   FerretDB for database. ?
 -   Vite for bundler/buidler
--   Just Svelte (not SvelteKit) I think. Don't really need SSR because there's really just the one 'page' and it's very dynamic and doesn't need SEO.
+-   Just Svelte (not SvelteKit) I think. Don't really need SSR because there's really just the one 'page' and it's very dynamic and doesn't need SEO. Vite bundles, svelte-router serves compiled files (? test)
 -   Fridge and user management menu can actually be outside of the fridge, accessed from the 'Fridge poetry. Welcome' page. Doesn't need to be on the fridge itself.
 -   Add 'and' !
+-   Add 'or' !
 
 ## MVP Features
 
 -   Can drag+drop magnets and record their positions. Can retrieve magnets' positions and display them.
 -   Can create account. Can change your display name. Can log in and out. Can view their fridges.
+-   Can change word list on create fridge
+-   Can add words to a fridge
 -   Can create fridges. Can invite people to a fridge. Can accept invitations.
 -   Invited users have different permissions than owners.
 -   Users are invited by email. If that email is not a registered account, there is a flow for the user to sign up and join the fridge at the same time.
--   Can change word list. This necessarily removes removed words from the fridge, and randomly places new words. Case-insensitive?
--   Users are given a color. This is used for the mode where you can see which words were placed by which people.
+-   Users can choose a color. (This will eventually be used for the mode where you can see which words were placed by which people.)
 -   Can opt-in to email notifications when fridge changes (with cooldown - sends first email right away, waits until sending another)
 -   ~~Mobile-friendly interface: MVP features are also available on mobile.~~
     -   ~~Tap a word to select it? Long-hold to drag-and-drop? Pinch and two-finger drag to zoom and scroll?~~
     -   New goal: Technically possible to use on mobile, if frustrating, and keep mobile version in mind when developing.
+-   Can reset account password. Can change account password.
 
 ## Stretch:
 
@@ -31,14 +34,18 @@ Second go.
 -   Playback mode - when returning to a fridge after a while, can see which words were moved and from where. The words are colored based on who moved them, and there is a non-interactable ghost where they came from.
 -   Invitations can be revoked and declined.
 -   Users can add their own words. Permissions about how many custom words each user can add.
--   Can reset account password. Can change account password.
 -   "X Users online" display
 -   Public fridges w/ guest mode
 -   "Remember me" login
+-   Change email address associated with your account. (Remember that invitations are stored at email address and at user id.)
 -   Word palette of words not currently being used: larger word pool, less cluttered
 -   Change display name + color.
 -   Fridge selection highlights fridges with changes
 -   Archive / delete fridge
+-   Fridge card is preview of the fridge (build out with known word locations)
+-   Fridge card has information about who is currently 'on' the fridge - maybe live updates
+-   Can delete words in word-edit mode on fridge
+-   Can change word z-index
 
 Creep:
 
@@ -89,26 +96,42 @@ Creep:
     -   Words
     -   Mobile controls
 
-## MVP routes
+## MVP frontend routes
 
 -   /
 -   /login
 -   /login/accept
--   /fridge/[uid]
--   /manage/[uid]
+-   /login/resetpass
+-   /fridge/id/[uid]
+-   /fridge/new
+-   /manage/id/[uid]
 -   /invitations
+
+## MVP backend routes
+
+-   // get invite ids by user
+-   // get invite ids by fridge
+-   // create invite
+-   // accept invite
+-   // update word location (streaming?)
+-   // get words by fridge id
+-   // get user settings for fridge by fridge+user
+-   // create user
+-   // create fridge
+-
 
 ## MVP data
 
-### Invitation
+### Word list
 
 ```
-    {
-        id: "invite1",
-        fridgeID: "fridge1",
-        fromID: "alice",
-        toEmail: "bob@test.com",
-        toID: "bob", // Populated on Accept. Could also: populate if you can, and if you can't, populate on Accept and add a field like "wasNewSignup" for metrics sakes.
-        status: INVITATION_STATUSES.ACCEPTED, // Nuke invite once accepted? Should keep revoked+declined so can't re-invite
-    }
+3 the   // number indicates number of word to generate: the the the
+and     // no number = 1 copy of word
+5       // one number = treat this number as a word. Add one of them
+2 5     // two numbers = two copies of '5'
+
 ```
+
+## Notes
+
+-   Every user has settings for a fridge in the settings collection. Therefore, to get a list of fridges for a user, or list of users on a fridge, check the settings collection.
