@@ -1,9 +1,24 @@
 # Fridge Poetry
 
+## Details for quickly catching myself up:
+
+-   There is API documentation (./apidocs/reference)
+-   You used an app called Pencil to do a map of the app flow. (./mvp_flow.epgz)
+-   You have designs in Figma.
+-   There's a bit of a Postman collection going, under your ek@pm account locally.
+
+D: \00_software\postgres\pgAdmin 4\runtime > psql.exe -d postgres -U postgres
+
+\c fridge_poetry // use this database
+
+\d <table_name> show details about this table
+
+## Intro
+
 Second go.
 
 -   UI framework wraps entire frontend, not just specific parts. Embed the 'fridge' as a component.
--   FerretDB for database. ?
+-   Postgres for database
 -   Vite for bundler/buidler
 -   Just Svelte (not SvelteKit) I think. Don't really need SSR because there's really just the one 'page' and it's very dynamic and doesn't need SEO. Vite bundles, svelte-router serves compiled files (? test)
 -   Fridge and user management menu can actually be outside of the fridge, accessed from the 'Fridge poetry. Welcome' page. Doesn't need to be on the fridge itself.
@@ -46,11 +61,16 @@ Second go.
 -   Fridge card has information about who is currently 'on' the fridge - maybe live updates
 -   Can delete words in word-edit mode on fridge
 -   Can change word z-index
+-   Can change theme of fridge - background, color scheme
+-   Different 'word sets' to populate fridge with, in different themes or vibes. Emoji set?
+-   Users can add a photo/todo list to the fridge
+-   Users can opt-in to sharing hometown so we can add a weather widget (and/or local time widget) showing the time and weather for different users. Cute for friends and families who live far away from each other.
 
 Creep:
 
 -   E2E encrypted chat
 -   Add pics and postit notes to fridge w/ magnets. Add calendar! From Calendy? Add plugin system so people can create their own widgets - Facebook, weather, todo list, favorite game...
+-   Users can create and share their own word sets
 
 ## MVP Required components
 
