@@ -1,0 +1,682 @@
+openapi: 3.1.0
+info:
+  title: Fridge Poetry API
+  version: '1.0'
+servers:
+  - url: 'http://localhost:3000'
+paths:
+  /user:
+    put:
+      summary: Create user
+      operationId: put-user
+      responses:
+        '201':
+          description: |-
+            {
+              "id": "newUserID",
+              "email": "bob.fellow@gmail.com",
+              "password": "askfjhsf"
+            }
+      description: 'Create a new user. Returns completed object (including ID, which is generated server-side).'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              properties:
+                email:
+                  type: string
+                  minLength: 1
+                password:
+                  type: string
+                  minLength: 1
+              required:
+                - email
+                - password
+              x-examples:
+                example-1:
+                  email: bob.fellow@gmail.com
+                  password: askfjhsf
+            examples:
+              example-1:
+                value:
+                  email: bob.fellow@gmail.com
+                  password: askfjhsf
+  '/user/{userID}':
+    parameters:
+      - schema:
+          type: string
+        name: userID
+        in: path
+        required: true
+    get:
+      summary: GET user by ID
+      tags: []
+      responses:
+        '200':
+          description: |-
+            {
+              "id": "bob1",
+              "email": "bob.fellow@gmail.com",
+              "password": "askfjhsf",
+              "verified": true,
+              "createDate": "04-02-2025"
+            }
+      operationId: get-user-userID
+      description: Get user by id.
+  /fridge:
+    put:
+      summary: Create fridge
+      operationId: put-fridge
+      responses:
+        '201':
+          description: |-
+            {
+              "id": "newfridge1",
+              "owner": "Alice",
+              "name": "New fridge!",
+              "wordList": [
+                "bat",
+                "ball",
+                "marker"
+              ]
+            }
+      description: Create new fridge. ID is generated before save (ie is not part of request) and is returned as part of response.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              x-examples:
+                example-1:
+                  owner: Alice
+                  name: New fridge!
+                  wordList:
+                    - bat
+                    - ball
+                    - marker
+              properties:
+                owner:
+                  $ref: '#/components/schemas/User'
+                name:
+                  type: string
+                  minLength: 1
+                wordList:
+                  type: array
+                  items:
+                    type: object
+              required:
+                - owner
+                - name
+                - wordList
+            examples:
+              example-1:
+                value:
+                  owner: Alice
+                  name: New fridge!
+                  wordList:
+                    - bat
+                    - ball
+                    - marker
+  '/fridge/{fridgeID}':
+    parameters:
+      - schema:
+          type: string
+        name: fridgeID
+        in: path
+        required: true
+    get:
+      summary: Get fridge by ID
+      tags: []
+      responses:
+        '200':
+          description: |-
+            {
+                id: 'fridge1',
+                name: "Fam fridge",
+                ownerID: 'aliceUID',
+                wordList: ['apple', 'swamp', 'meagre'],
+            }
+      operationId: get-fridge-fridgeID
+      description: Get one fridge by id for manage and for use fridge (get word information separately).
+    patch:
+      summary: ''
+      operationId: patch-fridge-fridgeID
+      responses:
+        '200':
+          description: OK
+      description: Update fridge. Cannot update word list on existing fridge.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              x-examples:
+                example-1:
+                  name: John
+                  age: 30
+                  cars:
+                    - Ford
+                    - BMW
+                    - Fiat
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                ownerID:
+                  $ref: '#/components/schemas/User'
+              required:
+                - name
+                - ownerID
+            examples:
+              example-1:
+                value:
+                  name: New name
+  '/fridges/list/{userID}':
+    parameters:
+      - schema:
+          type: string
+        name: userID
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: |-
+            [
+                {
+                    id: "fridge1",
+                    ownerID: "alice",
+                    name: "Alice's fridge",
+                    lastChanged: "20250124",
+                },
+                { ... },
+            ]
+      operationId: get-fridges-userID
+      description: Get list of fridges by user (in owner or users) for display on main page
+  '/settings/{fridgeID}/{userID}':
+    parameters:
+      - schema:
+          type: string
+        name: fridgeID
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: userID
+        in: path
+        required: true
+    get:
+      summary: Get user's fridge settings
+      tags: []
+      responses:
+        '200':
+          description: |-
+            {
+                displayName: 'Alice',
+                userColor: 'red',
+                receiveNotifications: false
+            }
+      operationId: get-settings-fridgeID-userID
+      description: 'Get user settings for this fridge (whether to send notifications, color, display name..)'
+    patch:
+      summary: ''
+      operationId: patch-settings-fridgeID-userID
+      responses:
+        '200':
+          description: OK
+      description: Update user settings for a fridge.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              properties:
+                displayName:
+                  type: string
+                  minLength: 1
+                userColor:
+                  type: string
+                  minLength: 1
+                receiveNotifications:
+                  type: boolean
+              required:
+                - displayName
+                - userColor
+                - receiveNotifications
+              x-examples:
+                example-1:
+                  displayName: Alice
+                  userColor: red
+                  receiveNotifications: false
+            examples:
+              example-1:
+                value:
+                  displayName: Alice
+                  userColor: red
+                  receiveNotifications: false
+  '/words/{fridgeID}':
+    parameters:
+      - schema:
+          type: string
+        name: fridgeID
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: |-
+            [
+                {
+                    id: "wordID",
+                    position: { x: 104, y: 203 },
+                    text: 'swamp',
+                    lastMoved: '2025-03-07', // for calculating z-index and for 'new moves' notification
+                    // lastMovedBy: 'aliceID' // for stretch goal "show which words have been moved by who since last login"
+                },
+                {
+                    id: "wordID2",
+                    position: { x: 134, y: 204 },
+                    text: 'butt',
+                    lastMoved: '2025-03-05',
+                }, 
+                ...
+            ]
+      operationId: get-words-fridgeID
+      description: |-
+        Get list of all the words on a fridge, for displaying and moving on the fridge.
+        Will eventually be streaming - here?
+    patch:
+      summary: Update fridge's words
+      operationId: patch-words-fridgeID
+      description: |-
+        Update word information (when moving on fridge).
+        Will eventually be streaming - here?
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              description: ''
+              minItems: 1
+              uniqueItems: true
+              x-examples:
+                example-1:
+                  - id: wordID2
+                    position:
+                      x: 134
+                      'y': 204
+                    text: butt
+                    lastMoved: '2025-03-05'
+              items:
+                type: object
+                properties:
+                  id:
+                    minLength: 1
+                    $ref: ''
+                  position:
+                    type: object
+                    required:
+                      - x
+                      - 'y'
+                    properties:
+                      x:
+                        type: number
+                      'y':
+                        type: number
+                  text:
+                    type: string
+                    minLength: 1
+                  lastMoved:
+                    type: string
+                    minLength: 1
+                    format: date-time
+                required:
+                  - id
+                  - position
+                  - text
+                  - lastMoved
+            examples:
+              example-1:
+                value:
+                  - id: wordID2
+                    position:
+                      x: 134
+                      'y': 204
+                    text: butt
+                    lastMoved: '2025-03-05'
+  '/invitations/user/{userID}':
+    parameters:
+      - schema:
+          type: string
+        name: userID
+        in: path
+        required: true
+    get:
+      summary: Get open invitation by user
+      tags: []
+      responses:
+        '200':
+          description: |-
+            [
+                {
+                    id: "invite1",
+                    fridgeID: "fridge1",
+                    fridgeName: "Alice's fridge",
+                    fromDisplayName: "Alice",
+                },
+                { ... }
+            ]
+      operationId: get-invitations-user-userID
+      description: 'Get list of open invitations by user, for display on main page'
+  '/invitations/fridge/{fridgeID}':
+    parameters:
+      - schema:
+          type: string
+        name: fridgeID
+        in: path
+        required: true
+    get:
+      summary: Get open invitations by fridge
+      tags: []
+      responses:
+        '200':
+          description: |-
+            [
+                { to: 'erin@knowles.com', sendDate: '2025-04-01' },
+                {} ...
+            ],
+      operationId: get-invitations-fridge-fridgeID
+      description: 'Get list of open invitations by fridge, for display on fridge manage page (admin only)'
+  '/invitations/accept/{inviteID}':
+    parameters:
+      - schema:
+          type: string
+        name: inviteID
+        in: path
+        required: true
+    post:
+      summary: Accept invitation
+      operationId: post-invitations-accept-inviteID
+      responses:
+        '200':
+          description: OK
+      description: 'Accept invitation. '
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              x-examples:
+                example-1:
+                  id: inviteUID
+                  to: erin@knowles.com
+                  fridge: fridgeID
+                  ////...TODO. Want it to verify on backend. What else does it need?: null
+              properties:
+                id:
+                  type: string
+                  minLength: 1
+                to:
+                  minLength: 1
+                  type: string
+                fridgeID:
+                  minLength: 1
+                  type: string
+              required:
+                - id
+                - to
+                - fridgeID
+            examples:
+              example-1:
+                value:
+                  id: inviteUID
+                  to: erin@knowles.com
+                  fridge: fridgeID
+                  ////...TODO. Want it to verify on backend. What else does it need?: null
+  /invitations/send:
+    post:
+      summary: ''
+      operationId: post-invitations-send
+      responses:
+        '200':
+          description: OK
+      description: Create + send an invitation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              x-examples:
+                example-1:
+                  to: erinknowles@gmail.com
+                  from: userID
+                  fridge: fridgeID
+              properties:
+                toEmail:
+                  type: string
+                  minLength: 1
+                fromID:
+                  minLength: 1
+                  type: string
+                fridgeID:
+                  minLength: 1
+                  type: string
+              required:
+                - toEmail
+                - fromID
+                - fridgeID
+            examples:
+              example-1:
+                value:
+                  to: erinknowles@gmail.com
+                  from: userID
+                  fridge: fridgeID
+components:
+  schemas:
+    User:
+      title: User
+      type: object
+      description: ''
+      examples:
+        - id: 142
+          firstName: Alice
+          lastName: Smith
+          email: alice.smith@gmail.com
+          dateOfBirth: '1997-10-31'
+          emailVerified: true
+          signUpDate: '2019-08-24'
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the given user.
+        email:
+          type: string
+          format: email
+        verified:
+          type: boolean
+          format: date
+          example: '1997-10-31'
+        createDate:
+          type: string
+          format: date
+          description: The date that the user was created.
+        password:
+          type: string
+      required:
+        - id
+        - email
+    Fridge:
+      description: ''
+      type: object
+      x-examples:
+        example-1:
+          id: string
+          owner: string
+          name: string
+          wordList:
+            - bat
+            - ball
+            - marker
+      examples:
+        - id: string
+          owner: string
+          name: string
+          wordList:
+            - bat
+            - ball
+            - marker
+      properties:
+        id:
+          type: string
+          minLength: 1
+        ownerID:
+          minLength: 1
+          type: string
+        name:
+          type: string
+          minLength: 1
+        wordList:
+          type: array
+          items: {}
+      required:
+        - id
+        - ownerID
+        - name
+        - wordList
+    Settings:
+      description: User's settings for a fridge. Each document represents one user-fridge combination.
+      type: object
+      x-examples:
+        example-1:
+          id: string
+          user: userID
+          fridge: fridgeID
+          displayName: Alice
+          color: red
+          notifications: false
+      examples: []
+      properties:
+        id:
+          type: string
+          minLength: 1
+        userID:
+          minLength: 1
+          type: string
+        fridgeID:
+          minLength: 1
+          type: string
+        displayName:
+          type: string
+          minLength: 1
+        color:
+          type: string
+          minLength: 1
+        notifications:
+          type: boolean
+      required:
+        - id
+        - userID
+        - fridgeID
+        - displayName
+        - color
+        - notifications
+    Invitation:
+      description: |-
+        toEmail is null if account at registered exists (and toID is filled).
+        toID is null if account at that email does not exist (and toEmail is filled).
+        Update these when account is registered. Remember that accepted invitations are deleted.
+      type: object
+      x-examples:
+        example-1:
+          id: invite1
+          fridgeID: fridge1
+          fromID: alice
+          toEmail: bob@test.com
+          toID: null
+          status: PENDING
+      examples:
+        - id: invitationID
+          fridgeID: fridgeID
+          fromID: aliceID
+          toEmail: alice@gmail.com
+          toID: null
+          status: pending
+      properties:
+        id:
+          type: string
+          minLength: 1
+        fridgeID:
+          type: string
+        fromID:
+          type: string
+        toEmail:
+          type: string
+          minLength: 1
+        toID:
+          type: string
+        status:
+          type: string
+          enum:
+            - DECLINED
+            - PENDING
+      required:
+        - id
+        - fridgeID
+        - fromID
+        - status
+    Word:
+      description: |-
+        Represents a word on a fridge. 
+         - lastMovedDate is for displaying fridge updates, and for calculating z-index. Eventually, also add lastMovedBy, and lastLocation (or lastMove: {position, movedDate, movedBy}
+      type: object
+      properties:
+        id:
+          type: string
+          minLength: 1
+        position:
+          type: object
+          properties:
+            x:
+              type: number
+            'y':
+              type: number
+          required:
+            - x
+            - 'y'
+        text:
+          type: string
+          minLength: 1
+        lastMoved:
+          type: string
+          minLength: 1
+      required:
+        - id
+        - position
+        - text
+        - lastMoved
+      x-examples:
+        example-1:
+          id: wordID2
+          position:
+            x: 134
+            'y': 204
+          text: butt
+          lastMoved: '2025-03-05'
+      examples:
+        - id: string
+          position:
+            x: 0
+            'y': 0
+          text: string
+          lastMovedDate: string
