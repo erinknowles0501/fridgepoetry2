@@ -31,7 +31,11 @@ Second go.
 -   Can create account. Can change your display name. Can log in and out. Can view their fridges.
 -   Can change word list on create fridge
 -   Can add words to a fridge
--   Can create fridges. Can invite people to a fridge. Can accept invitations.
+-   Can create fridges.
+-   Can invite people to a fridge.
+-   Can accept invitations.
+-   Can revoke invitations.
+-   Can remove user from fridge.
 -   Invited users have different permissions than owners.
 -   Users are invited by email. If that email is not a registered account, there is a flow for the user to sign up and join the fridge at the same time.
 -   Users can choose a color. (This will eventually be used for the mode where you can see which words were placed by which people.)
@@ -155,3 +159,13 @@ and     // no number = 1 copy of word
 ## Notes
 
 -   Every user has settings for a fridge in the settings collection. Therefore, to get a list of fridges for a user, or list of users on a fridge, check the settings collection.
+
+## TODO
+
+-   Update OpenAPI docs with changes
+-   Capture the following info for the invites table?
+    -   Invitations to existing users (ends up being permissions table. Pop over from email invites when signup. Don't forget to check when signup for email in email invites!)
+    -   Invitations to email addresses - unexisting users - ends up keyed to 'shadow user' table
+    -   Shadow user table - email addresses that are outside of the system
+-   Backend testing
+-   Frontend - JWT - restricted routing

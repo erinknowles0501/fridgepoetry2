@@ -7,7 +7,7 @@
     "scripts": {
         "test": "node --test tests",
         "dev": "node app.js",
-        "migrate": "node migrations/run.js false migrations/temp.sql",
+        "migrate": "node migrations/run.js false migrations/create_tables.sql",
         "migrate-test": "node migrations/run.js true migrations/create_tables.sql"
     },
     "author": "",

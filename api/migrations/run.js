@@ -3,24 +3,26 @@ import { readFileSync } from 'node:fs';
 import db from '../db.js';
 import testDB from '../tests/testdb.js';
 
+// TODO createClient() that creates instance of db with parameters name, user, pass, host, port
+
 async function migrate(isTesting = false, filepath) {
     const dbToUse = JSON.parse(isTesting) ? testDB : db;
     const sqlFile = readFileSync(filepath, 'utf-8');
     //console.log('sql', sqlFile);
 
     const statements = sqlFile
-        .split('/;\s*$/gm') // regex for semicolons at ends of lines
+        .split(/;\s*$/gm) // regex for semicolons at ends of lines
         .map(s => s.trim())
         .filter(s => s.length > 0);
 
     await dbToUse.query('BEGIN;');
     try {
         for (const statement of statements) {
-            console.log('statement', statement);
-
+            console.log('statement:', statement);
             await dbToUse.query(statement);
         }
         await dbToUse.query('COMMIT;');
+        console.log('finished migrating');
     } catch (e) {
         console.log(e);
         await dbToUse.query('ROLLBACK;');
@@ -31,6 +33,6 @@ export default migrate;
 
 const isTesting = process.argv[2];
 const filepath = process.argv[3];
-console.log('isTesting, filepath', isTesting, filepath);
+console.log('isTesting, filepath:', isTesting, filepath);
 
 migrate(isTesting, filepath);
