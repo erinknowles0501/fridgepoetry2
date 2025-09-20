@@ -1,5 +1,6 @@
 <script>
     import { navigate } from "svelte-routing";
+    import { user } from "../stores.js";
 
     let email = $state("erinknowles@protonmail.com");
     let password = $state("password");
@@ -20,6 +21,7 @@
             .then((res) => {
                 res.json().then((data) => {
                     console.log(data);
+                    user.set(data);
                     navigate("/dashboard", { replace: true });
                 });
             })

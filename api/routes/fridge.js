@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getFridgeById, updateFridge, createFridge } from '../models/fridgeModel.js';
+import { getFridgeById, updateFridge, createFridge, deleteFridge } from '../models/fridgeModel.js';
 import { isLoggedIn, isOwner } from '../authorization.js';
 
 const router = Router();
@@ -16,7 +16,12 @@ router.patch('/:id', isLoggedIn, isOwner, async (req, res) => {
 
 router.put('/', async (req, res) => {
     const result = await createFridge(req.body);
-    res.json(result);
+    res.json({ success: result });
+});
+
+router.delete('/:id', async (req, res) => {
+    const result = await deleteFridge(req.params.id);
+    res.json({ success: result });
 });
 
 

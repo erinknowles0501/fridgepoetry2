@@ -36,6 +36,7 @@ Second go.
 -   Can accept invitations.
 -   Can revoke invitations.
 -   Can remove user from fridge.
+-   Owner can delete fridge.
 -   Invited users have different permissions than owners.
 -   Users are invited by email. If that email is not a registered account, there is a flow for the user to sign up and join the fridge at the same time.
 -   Users can choose a color. (This will eventually be used for the mode where you can see which words were placed by which people.)

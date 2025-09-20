@@ -10,7 +10,7 @@ router.get('/:fridgeID', async (req, res) => {
         return {
             id: word.id,
             position: { x: word.position_x, y: word.position_y },
-            text: word.word,
+            text: word.text,
             lastMoved: word.last_moved,
             lastMovedBy: word.last_moved_by
         }

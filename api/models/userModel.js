@@ -1,4 +1,7 @@
-export async function getUserByEmail(db, email) {
+import { toSnake } from "snake-camel";
+import prodDB from '../db.js';
+
+export async function getUserByEmail(email, db = prodDB) {
     const result = await db.query(
         `SELECT * FROM users 
         INNER JOIN email ON users.email_id = email.id
@@ -8,7 +11,7 @@ export async function getUserByEmail(db, email) {
     return result.rows[0];
 }
 
-export async function createUser(db, body) {
+export async function createUser(body, db = prodDB) {
     const emailResult = (await db.query(`INSERT INTO email (email, is_verified) VALUES ($1, 'f') RETURNING *`, [body.email])).rows[0];
     const result = await db.query(
         'INSERT INTO users (email_id, passhash) VALUES ($1, $2) RETURNING *',
@@ -17,25 +20,17 @@ export async function createUser(db, body) {
     return result.rows[0];
 }
 
-export async function updateUserDefaults(db, userID, body) {
-    if (body.displayName) {
-        await db.query(
-            'UPDATE users SET display_name = $1 WHERE id = $2',
-            [body.displayName, userID]
-        );
+export async function updateUserDefaults(userID, body, db = prodDB) {
+    const safeBody = Object.entries(toSnake(body)).filter(([key, value]) => {
+        return key == 'display_name' ||
+            key == 'color' ||
+            key == 'notifications';
+    });
+
+    for (const [key, value] of safeBody) {
+        await db.query(`UPDATE users SET ${key} = $1 WHERE id = $2`, [value, userID]);
     }
-    if (body.color) {
-        await db.query(
-            'UPDATE users SET color = $1 WHERE id = $2',
-            [body.color, userID]
-        );
-    }
-    if (body.notifications) {
-        await db.query(
-            'UPDATE users SET notifications = $1 WHERE id = $2',
-            [body.notifications, userID]
-        );
-    }
+
     const result = await db.query(`SELECT * FROM users WHERE id = $1`, [userID]);
     return result.rows[0];
 }

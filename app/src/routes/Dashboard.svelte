@@ -2,6 +2,7 @@
     import { Router, Link, Route, navigate } from "svelte-routing";
     import Welcome from "./Welcome.svelte";
     import ManageFridge from "./ManageFridge.svelte";
+    import Create from "./Create.svelte";
 
     export let url = "/dashboard";
     // export let basepath = "/dashboard";
@@ -36,6 +37,7 @@
         <Route path="/manage/:id" let:params>
             <ManageFridge id={params.id} />
         </Route>
+        <Route path="/create"><Create /></Route>
         <!-- <Route path="/dashboard"><Dashboard /></Route> -->
         <!-- <Route path="/fridge/id"><Fridge {id} /></Route> -->
     </main>

@@ -1,10 +1,11 @@
+import dotenv from 'dotenv/config';
 import session from 'express-session';
 import { getFridgeById } from './models/fridgeModel.js';
 
 export default session({
     resave: false, // don't save session if unmodified
     saveUninitialized: false, // don't create session until something stored
-    secret: 'shhhh, very secret' // TODO env var with secret
+    secret: process.env.SESSION_SECRET
 });
 
 // console.log('session', session);
@@ -36,6 +37,17 @@ export async function isLoggedIn(req, res, next) {
     }
 }
 
+export async function isInvitee(req, res, next) {
+    const invitation = await getInviteByDetails(req.params.id, req.session.user.id, 'PENDING');
+    if (invitation) {
+        return next();
+    } else {
+        const error = new Error('Not owner of this resource');
+        error.status = 401;
+        return next(error);
+    }
+}
+
 export async function isMember(req, res, next) {
     // if user is member (invited user) of fridge that the resource is associated with
     // member of fridge, member of fridge that the word is on...
@@ -43,7 +55,14 @@ export async function isMember(req, res, next) {
     /* - get fridge
     TODO
     */
-
+    const invitation = await getInviteByDetails(req.params.id, req.session.user.id, 'ACCEPTED');
+    if (invitation) {
+        return next();
+    } else {
+        const error = new Error('Not owner of this resource');
+        error.status = 401;
+        return next(error);
+    }
 }
 
 export async function isOwner(req, res, next) {
