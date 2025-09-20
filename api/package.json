@@ -5,10 +5,10 @@
     "main": "index.js",
     "type": "module",
     "scripts": {
-        "test": "node --test tests",
+        "test": "node --test",
         "dev": "node app.js",
         "migrate": "node migrations/run.js false migrations/create_tables.sql",
-        "migrate-test": "node migrations/run.js true migrations/create_tables.sql"
+        "migrate:test": "node migrations/run.js true migrations/create_tables.sql"
     },
     "author": "",
     "license": "ISC",

@@ -4,7 +4,7 @@ import { getFridgeWords } from '../models/wordModel.js';
 const router = Router();
 
 router.get('/:fridgeID', async (req, res) => {
-    const wordsOnFridge = getFridgeWords(req.params.fridgeID);
+    const wordsOnFridge = await getFridgeWords(req.params.fridgeID);
 
     const result = wordsOnFridge.map(word => {
         return {

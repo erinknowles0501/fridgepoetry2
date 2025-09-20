@@ -1,11 +1,11 @@
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   id BIGSERIAL PRIMARY KEY,
   email_id BIGINT NOT NULL,
   passhash VARCHAR NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  display_name TEXT NOT NULL CHECK (display_name != ''),
-  color TEXT NOT NULL,
-  notifications BOOLEAN NOT NULL
+  display_name TEXT CHECK (display_name != ''),
+  color TEXT,
+  notifications BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE IF NOT EXISTS fridge (

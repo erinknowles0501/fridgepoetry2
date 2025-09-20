@@ -10,8 +10,12 @@ export async function signupUser(email, password) {
         throw new Error(`User ${email} already exists`);
     }
 
-    const hash = await bcrypt.hash(password, SALT_ROUNDS);
-    return await createUser(email, hash);
+    const passhash = await bcrypt.hash(password, SALT_ROUNDS);
+    return await createUser(db, {
+        email,
+        passhash
+    }
+    );
 }
 
 export async function loginUser(email, password) {
