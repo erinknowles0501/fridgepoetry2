@@ -1,80 +1,99 @@
-import dotenv from 'dotenv/config';
 import session from 'express-session';
 import { getFridgeById } from './models/fridgeModel.js';
+import { getInvitationByID, getInvitationByDetails } from './models/invitationModel.js';
 
 export default session({
     resave: false, // don't save session if unmodified
     saveUninitialized: false, // don't create session until something stored
-    secret: process.env.SESSION_SECRET
+    secret: process.env.SESSION_SECRET,
+    cookie: {
+        secure: false, // set to true ONLY if using HTTPS!
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 // 1 hour
+    }
 });
 
-// console.log('session', session);
+// export function middlewareWrap(authFunc, ...args) {
+//     console.log('middlewarewrap args', args);
 
-
-
-// async function hash(pass) {
-//     const result = await bcrypt.hash(pass, 10);
-//     return result;
-// }
-
-// function restrict(req, res, next) {
-//     if (req.session.user) {
-//         next();
-//     } else {
-//         req.session.error = 'Access denied!';
-//         res.redirect('/login');
+//     return async (req, res, next, err) => {
+//         const success = await authFunc(...args);
+//         if (success) {
+//             next();
+//         } else {
+//             next(err);
+//         }
 //     }
 // }
 
+// TODO: isOwnerMiddleware, isOwnerOrMemberMiddleware, isCurrentUserMiddleware Both of those are used often enough in pretty much exactly the same way. Have to look into it, but I think it would be handy to be able to call them in other ways too from within routes that aren't using them the standard way.
 
 export async function isLoggedIn(req, res, next) {
-    if (req.session.user) {
-        return next();
-    } else {
+    if (req.session.user) return next();
+    else {
         const error = new Error('Not logged in');
         error.status = 401;
-        return next(error);
+        throw error;
     }
 }
 
-export async function isInvitee(req, res, next) {
-    const invitation = await getInviteByDetails(req.params.id, req.session.user.id, 'PENDING');
-    if (invitation) {
-        return next();
+export async function hasOpenInvitation(sessionUser, invitationID) {
+    const invitation = await getInvitationByID(invitationID);
+    console.log('invitation', invitation);
+
+    if (invitation.status == 'PENDING' && invitation.to_id == sessionUser.id) {
+        return true;
     } else {
         const error = new Error('Not owner of this resource');
         error.status = 401;
-        return next(error);
+        throw error;
     }
 }
 
-export async function isMember(req, res, next) {
-    // if user is member (invited user) of fridge that the resource is associated with
-    // member of fridge, member of fridge that the word is on...
-    // fridge members can:
-    /* - get fridge
-    TODO
-    */
-    const invitation = await getInviteByDetails(req.params.id, req.session.user.id, 'ACCEPTED');
-    if (invitation) {
-        return next();
+export async function isOwner(sessionUser, fridgeID) {
+    const fridge = await getFridgeById(fridgeID);
+    if (fridge.owner_id == sessionUser.id) {
+        return true;
     } else {
-        const error = new Error('Not owner of this resource');
-        error.status = 401;
-        return next(error);
+        return false;
     }
 }
 
-export async function isOwner(req, res, next) {
-    // if user is owner of the fridge that the resource is associated with
-    // owner of fridge, owner of word on fridge...
-
-    const fridge = await getFridgeById(req.params.id);
-    if (fridge.owner_id == req.session.user.id) {
-        return next();
+export async function isMember(sessionUser, fridgeID) {
+    const invitation = await getInvitationByDetails(sessionUser, fridgeID);
+    if (invitation && invitation.status == 'ACCEPTED') {
+        return true;
     } else {
-        const error = new Error('Not owner of this resource');
+        const error = new Error('Not member of this resource');
         error.status = 401;
-        return next(error);
+        throw error;
     }
 }
+
+export async function isCurrentUser(sessionUser, userID) {
+    if (sessionUser.id == userID) return true;
+    else {
+        const error = new Error('Not owner of this resource');
+        error.status = 403;
+        throw error;
+    }
+}
+
+// export function isAnyOf(...middlewares) {
+//     return async (req, res, next) => {
+//         let success = false;
+//         for (const middleware of middlewares) {
+//             success = await middleware(req, res, (err) => {
+//                 if (err) return false;
+//                 return true;
+//             });
+//         }
+//         if (success) {
+//             next();
+//         } else {
+//             const error = new Error('Forbidden');
+//             error.status = 403; // TODO
+//             throw error;
+//         }
+//     }
+// }

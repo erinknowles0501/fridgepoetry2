@@ -1,6 +1,6 @@
 <script>
     import { get } from "svelte/store";
-    import { user } from "../stores.js";
+    import { auth } from "../stores.js";
     import { navigate } from "svelte-routing";
 
     let fridgeName = $state("New fridge name");
@@ -21,14 +21,15 @@
 
     async function createFridge() {
         const data = {
-            ownerID: get(user).id,
-            name: $state.snapshot(fridgeName),
-            wordList: $state.snapshot(words).split(","),
-            invitees: $state.snapshot(emails),
+            ownerID: get(auth).user.id,
+            name: fridgeName,
+            wordList: words.split(",").map((w) => w.trim()),
+            invitees: emails.map((e) => e.trim()),
         };
 
         const result = await fetch(`http://localhost:3000/fridge`, {
             method: "PUT",
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },

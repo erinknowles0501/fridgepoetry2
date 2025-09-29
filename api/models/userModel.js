@@ -3,7 +3,7 @@ import prodDB from '../db.js';
 
 export async function getUserByEmail(email, db = prodDB) {
     const result = await db.query(
-        `SELECT * FROM users 
+        `SELECT users.id, users.email_id, users.passhash, users.created_at, users.display_name, users.color, users.notifications, email.email FROM users 
         INNER JOIN email ON users.email_id = email.id
         WHERE email.email = $1`,
         [email]
@@ -12,7 +12,7 @@ export async function getUserByEmail(email, db = prodDB) {
 }
 
 export async function createUser(body, db = prodDB) {
-    const emailResult = (await db.query(`INSERT INTO email (email, is_verified) VALUES ($1, 'f') RETURNING *`, [body.email])).rows[0];
+    const emailResult = (await db.query(`INSERT INTO email (email, is_verified) VALUES ($1, 'false') RETURNING *`, [body.email])).rows[0];
     const result = await db.query(
         'INSERT INTO users (email_id, passhash) VALUES ($1, $2) RETURNING *',
         [emailResult.id, body.passhash]

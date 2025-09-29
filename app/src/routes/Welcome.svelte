@@ -1,15 +1,16 @@
 <script>
     import { onMount } from "svelte";
     import { Link } from "svelte-routing";
-    import { user } from "../stores.js";
+    import { auth } from "../stores.js";
     import { get } from "svelte/store";
 
     let fridges = $state([]);
-    let currentUser = get(user);
+    let currentUser = get(auth).user;
 
     onMount(async () => {
         const fridgesResult = await fetch(
-            `http://localhost:3000/fridges/list/${currentUser.id}`
+            `http://localhost:3000/fridges/list/${currentUser.id}`,
+            { credentials: "include" }
         );
         fridges = await fridgesResult.json();
     });

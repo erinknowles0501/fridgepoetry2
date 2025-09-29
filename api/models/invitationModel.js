@@ -1,8 +1,13 @@
 import prodDB from '../db.js';
 
-export async function getInviteByDetails(id, userID, status, db = prodDB) {
-    const result = await db.query(`SELECT * FROM user_invitation WHERE id = $1::int
-        AND to_id = $2 AND status = $3`, [id, userID, status]);
+export async function getInvitationByID(invitationID, db = prodDB) {
+    const result = await db.query(`SELECT * FROM user_invitation WHERE id = $1`, [invitationID]);
+    return result.rows[0];
+}
+
+export async function getInvitationByDetails(fridgeID, userID, db = prodDB) {
+    const result = await db.query(`SELECT * FROM user_invitation WHERE fridge_id = $1
+        AND to_id = $2`, [fridgeID, userID]);
     return result.rows[0];
 }
 

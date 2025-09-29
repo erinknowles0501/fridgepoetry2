@@ -6,29 +6,51 @@
     let fridge = $state({});
     let invitations = $state([]);
     let wordList = $state([]);
+    let deletingFridgeText = $state("");
+    let isDeletingFridge = $state(false);
+
+    let deleteRef;
 
     onMount(async () => {
-        const fridgeResult = await fetch(`http://localhost:3000/fridge/${id}`);
+        const fridgeResult = await fetch(`http://localhost:3000/fridge/${id}`, {
+            credentials: "include",
+        });
         fridge = await fridgeResult.json();
 
         const invitationsResult = await fetch(
-            `http://localhost:3000/invitations/fridge/${id}`
+            `http://localhost:3000/invitations/fridge/${id}`,
+            { credentials: "include" }
         );
         invitations = await invitationsResult.json();
 
-        const wordListResult = await fetch(`http://localhost:3000/words/${id}`);
+        const wordListResult = await fetch(
+            `http://localhost:3000/words/${id}`,
+            { credentials: "include" }
+        );
         wordList = await wordListResult.json();
     });
 
     async function deleteFridge() {
         const result = await fetch(`http://localhost:3000/fridge/${id}`, {
             method: "DELETE",
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },
         });
         if (result) navigate("/dashboard", { replace: true });
     }
+
+    $effect(() => {
+        if (isDeletingFridge == true) {
+            deletingFridgeText = "";
+            deleteRef.focus();
+        }
+    });
+
+    $effect(() => {
+        if (deletingFridgeText === "delete") deleteFridge();
+    });
 </script>
 
 <div>
@@ -59,12 +81,22 @@
         </div>
 
         <div>
-            <input
-                type="button"
-                color="red"
-                onclick={deleteFridge}
-                value="Delete!"
-            />
+            {#if !isDeletingFridge}
+                <input
+                    type="button"
+                    font-color="red"
+                    onclick={() => (isDeletingFridge = true)}
+                    value="Delete?"
+                />
+            {:else}
+                <p>Type 'delete' to delete.</p>
+                <input
+                    type="text"
+                    font-color="red"
+                    bind:value={deletingFridgeText}
+                    bind:this={deleteRef}
+                />
+            {/if}
         </div>
     {/if}
 

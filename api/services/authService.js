@@ -1,32 +1,36 @@
 import bcrypt from 'bcrypt';
 
 import { getUserByEmail, createUser } from '../models/userModel.js';
+import { sendVerificationEmail } from './mailService.js';
 
 const SALT_ROUNDS = 10;
 
 export async function signupUser(email, password) {
     const userExists = await getUserByEmail(email);
     if (userExists) {
-        throw new Error(`User ${email} already exists`);
+        const error = new Error('User ${email} already exists');
+        error.status = 400;
+        throw new Error(``);
     }
 
     const passhash = await bcrypt.hash(password, SALT_ROUNDS);
-    return await createUser(db, {
+    const user = await createUser({
         email,
         passhash
-    }
-    );
+    });
+
+    await sendVerificationEmail(email);
+
+    return user;
 }
 
 export async function loginUser(email, password) {
     const user = await getUserByEmail(email);
-    if (!user) {
-        throw new Error('Invalid email or password');
-    }
-
     const valid = await bcrypt.compare(password, user.passhash);
     if (!valid) {
-        throw new Error('Invalid email or password');
+        const error = new Error('Invalid email or password');
+        error.status = 401;
+        throw error;
     }
 
     return user;

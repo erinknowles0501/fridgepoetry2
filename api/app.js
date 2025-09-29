@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 
@@ -6,15 +7,18 @@ import mountRoutes from './routes/index.js';
 
 const app = express()
 const port = 3000
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}));
 app.use(express.json());
 
 app.use(session);
 mountRoutes(app);
 
 app.use((err, req, res, next) => {
-    console.error(err.stack)
-    res.status(500).send('Something broke!')
+    console.error(err.status, err.stack)
+    res.status(err.status || 500).json({ success: false, message: err.message })
 })
 
 app.get('/', (req, res) => {

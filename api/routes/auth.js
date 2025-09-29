@@ -8,10 +8,15 @@ router.post('/signup', async (req, res, next) => {
         const { email, password } = req.body;
 
         if (!email || !password) {
-            return res.status(400).json({ error: 'Email and password required' });
+            const error = new Error('Email and password required');
+            error.status = 401; // TODO
+            throw error;
         }
 
         const user = await signupUser(email, password);
+        req.session.regenerate(() => {
+            req.session.user = { id: user.id, email: user.email };
+        });
         req.session.user = { id: user.id, email: user.email };
 
         res.status(201).json({ id: user.id, email: user.email });
@@ -27,9 +32,10 @@ router.post('/login', async (req, res, next) => {
         const user = await loginUser(email, password);
         req.session.regenerate(() => {
             req.session.user = { id: user.id, email: user.email };
+            req.session.save(() => {
+                res.json({ id: user.id, email: user.email });
+            });
         });
-
-        res.json({ id: user.id, email: user.email });
     } catch (err) {
         next(err);
     }

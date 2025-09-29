@@ -2,29 +2,26 @@
     import { Router, Link, Route } from "svelte-routing";
     import Login from "./routes/Login.svelte";
     import Dashboard from "./routes/Dashboard.svelte";
-
-    export let url = "/login";
+    import ConfirmSignup from "./routes/ConfirmSignup.svelte";
+    import AwaitConfirmSignup from "./routes/AwaitConfirmSignup.svelte";
 </script>
 
-<main>
-    <h1>Fridge Poetry</h1>
-
-    <!-- <div class="card">
-        <Login />
-    </div> -->
-
-    <Router {url}>
+<div>
+    <Router>
         <!-- <nav>
             <Link to="/">Home</Link>
             <Link to="/login">About</Link>
         </nav> -->
-        <div>
-            <Route path="/login"><Login /></Route>
-            <Route path="/dashboard/*"><Dashboard /></Route>
-            <!-- <Route path="/fridge/id"><Fridge {id} /></Route> -->
-        </div>
+        <Route path="/"><Login /></Route>
+        <Route path="/awaitConfirmSignup"><AwaitConfirmSignup /></Route>
+        <Route path="/confirmSignup"><ConfirmSignup /></Route>
+        <Route path="/dashboard/*"><Dashboard /></Route>
+        <Route path="*">
+            <p>Route not found</p>
+        </Route>
+        <!-- <Route path="/fridge/id"><Fridge {id} /></Route> -->
     </Router>
-</main>
+</div>
 
 <style>
 </style>

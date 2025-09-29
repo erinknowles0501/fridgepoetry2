@@ -1,0 +1,135 @@
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    font-family: "Roboto", Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    font-size: 16px;
+    transition: all 0.2s;
+
+    color-scheme: light dark;
+    --bgcolor: light-dark(#ccc, #333);
+    --textcolor: light-dark(rgba(0, 0, 0, 0.87), rgba(255, 255, 255, 0.87));
+    --lighttextcolor: light-dark(rgba(0, 0, 0, 0.6), rgba(255, 255, 255, 0.6));
+    --bordercolor: light-dark(rgba(0, 0, 0, 0.1), rgba(255, 255, 255, 0.1));
+    --darkbordercolor: light-dark(rgba(0, 0, 0, 0.3), rgba(255, 255, 255, 0.3));
+    background-color: var(--bgcolor);
+    color: var(--textcolor);
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+    color: light-dark(rgba(0, 0, 0, 0.87), rgba(255, 255, 255, 0.87));
+    text-decoration: underline;
+}
+a:hover {
+    text-decoration: none;
+}
+
+header {
+    margin: 5em 10em 2em 10em;
+}
+
+header > a {
+    opacity: 0.7;
+    text-decoration: none;
+}
+header > a:hover {
+    opacity: 0.9;
+}
+
+header .header-wrap {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+header h1 {
+    font-family: "Instrument Sans", Arial, sans-serif;
+    font-weight: bold;
+    font-size: 2.5em;
+    margin: 0;
+}
+
+header .user-info {
+    display: flex;
+    align-items: baseline;
+    font-size: 1.15em;
+}
+
+header .logout {
+    font-size: 0.8em;
+    opacity: 0.6;
+    margin-left: 1em;
+}
+
+main {
+    margin: 0 10em;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    font-size: 0.9em;
+    font-weight: 300;
+    padding: 0.6em 0.8em;
+    background: var(--bgcolor);
+    border: 3px solid var(--bordercolor);
+}
+
+label {
+    font-size: 1em;
+    display: inline-block;
+}
+
+label:not(:first-child) {
+    margin-top: 2em;
+}
+
+input[type="button"],
+button {
+    font-size: 1em;
+    border: 3px solid var(--darkbordercolor);
+    color: var(--textcolor);
+    padding: 0.4em 0.7em;
+    background: var(--bgcolor);
+    margin: 0;
+}
+
+input:hover,
+button:hover {
+    border: 3px solid var(--lighttextcolor);
+}
+
+input[type="button"].secondary,
+button.secondary {
+    border: 3px solid var(--bgcolor);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+input[type="button"].secondary:hover,
+button.secondary:hover {
+    text-decoration: none;
+}
+
+/* @media (prefers-color-scheme: light) {
+    TODO!
+
+    :root {
+        color: #213547;
+        background-color: #ffffff;
+    }
+    a:hover {
+        color: #747bff;
+    }
+    button {
+        background-color: #f9f9f9;
+    }
+} */
