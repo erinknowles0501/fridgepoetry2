@@ -15,11 +15,11 @@ router.post('/signup', async (req, res, next) => {
 
         const user = await signupUser(email, password);
         req.session.regenerate(() => {
-            req.session.user = { id: user.id, email: user.email };
+            req.session.user = { id: user.id, email: user.email, displayName: user.display_name, color: user.color, notifications: user.notifications };
         });
-        req.session.user = { id: user.id, email: user.email };
+        req.session.user = { id: user.id, email: user.email, displayName: user.display_name, color: user.color, notifications: user.notifications };
 
-        res.status(201).json({ id: user.id, email: user.email });
+        res.status(201).json({ id: user.id, email: user.email, displayName: user.display_name, color: user.color, notifications: user.notifications });
     } catch (err) {
         next(err);
     }
@@ -31,9 +31,9 @@ router.post('/login', async (req, res, next) => {
 
         const user = await loginUser(email, password);
         req.session.regenerate(() => {
-            req.session.user = { id: user.id, email: user.email };
+            req.session.user = { id: user.id, email: user.email, displayName: user.display_name, color: user.color, notifications: user.notifications };
             req.session.save(() => {
-                res.json({ id: user.id, email: user.email });
+                res.json({ id: user.id, email: user.email, displayName: user.display_name, color: user.color, notifications: user.notifications });
             });
         });
     } catch (err) {
@@ -45,6 +45,14 @@ router.post('/logout', (req, res) => {
     req.session.destroy(() => {
         res.json({ message: "success" });
     });
+});
+
+router.get('/check-session', (req, res) => {
+    if (req.session && req.session.user) {
+        res.status(200).json({ isLoggedIn: true, user: req.session.user });
+    } else {
+        res.status(200).json({ isLoggedIn: false });
+    }
 });
 
 export default router;

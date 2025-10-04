@@ -1,14 +1,12 @@
 <script>
     import { Router, Link, Route, navigate } from "svelte-routing";
     import { SvelteURL } from "svelte/reactivity";
-    import { get } from "svelte/store";
-    // TODO Save user default display name and return it with user when login and use it here
 
+    import { auth } from "../state.svelte.js";
+    // TODO Save user default display name and return it with user when login and use it here
     import Welcome from "./Welcome.svelte";
     import ManageFridge from "./ManageFridge.svelte";
     import Create from "./Create.svelte";
-
-    import { auth } from "../stores.js";
 
     let { url } = $props();
     let pathname = new SvelteURL(window.location).pathname;
@@ -25,6 +23,7 @@
         })
             .then((res) => {
                 res.json().then((data) => {
+                    auth.user = null;
                     navigate("/", { replace: true });
                 });
             })
@@ -33,14 +32,14 @@
 </script>
 
 <header>
-    {#if pathname == "/dashboard/manage" || pathname == "/dashboard/create"}
-        <Link to="/dashboard">&lt;- Back to main</Link>
+    {#if pathname == "/manage" || pathname == "/create"}
+        <Link to="/">&lt;- Back to main</Link>
     {/if}
     <div class="header-wrap">
         <h1>Fridge Poetry</h1>
         <div class="user-info">
             <div class="welcome">
-                Welcome, <b>{get(auth).user.email.split("@")[0]}</b>
+                Welcome, <b>{auth.user?.displayName}</b>
             </div>
             <div class="logout"><a href="/" {onclick}>Logout</a></div>
         </div>
@@ -48,8 +47,8 @@
 </header>
 
 <!-- <nav>
-    {#if pathname == "/dashboard/manage" || pathname == "/dashboard/create"}
-        <Link to="/dashboard">Home</Link>
+    {#if pathname == "/manage" || pathname == "/create"}
+        <Link to="/">Home</Link>
     {/if}
 </nav> -->
 
@@ -60,7 +59,7 @@
             <ManageFridge id={params.id} />
         </Route>
         <Route path="/create"><Create /></Route>
-        <!-- <Route path="/dashboard"><Dashboard /></Route> -->
+        <!-- <Route path="/"><Dashboard /></Route> -->
         <!-- <Route path="/fridge/id"><Fridge {id} /></Route> -->
     </main>
 </Router>

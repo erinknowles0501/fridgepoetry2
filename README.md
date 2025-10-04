@@ -170,3 +170,5 @@ and     // no number = 1 copy of word
     -   Shadow user table - email addresses that are outside of the system
 -   Backend testing
 -   Frontend - JWT - restricted routing
+-   HTTPS
+-   Rate limiting for backend (especially anything with emails)

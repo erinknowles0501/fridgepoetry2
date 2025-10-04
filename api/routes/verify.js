@@ -9,9 +9,9 @@ router.get('/:token', async (req, res) => {
     const payload = jwt.verify(req.params.token, process.env.EMAIL_VERIFICATION_SECRET);
     console.log('payload', payload);
 
-    await setEmailVerified(payload.email, true);
+    const newUser = await setEmailVerified(payload.email, true);
 
-    res.redirect('http://localhost:5173/confirmSignup');
+    res.redirect(`http://localhost:5173/confirmSignup?user=${newUser.id}&email=${payload.email}`);
 });
 
 export default router;

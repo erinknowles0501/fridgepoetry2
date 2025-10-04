@@ -1,7 +1,7 @@
 <script>
     import { onMount } from "svelte";
     import { navigate } from "svelte-routing";
-    import { auth } from "../stores.js";
+    import { auth } from "../state.svelte.js";
 
     let email = $state("erinknowles@protonmail.com");
     let confirmEmail = $state("");
@@ -33,14 +33,10 @@
         )
             .then((res) => {
                 res.json().then((data) => {
-                    console.log(data);
-                    auth.set({ ...auth, user: data });
-                    navigate(
-                        isSigningUp ? "/awaitConfirmSignup" : "/dashboard",
-                        {
-                            replace: true,
-                        }
-                    );
+                    auth.user = data;
+                    navigate(isSigningUp ? "/awaitConfirmSignup" : "/", {
+                        replace: true,
+                    });
                 });
             })
             .catch((e) => console.log(e));

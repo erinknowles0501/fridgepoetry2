@@ -1,6 +1,5 @@
 <script>
-    import { get } from "svelte/store";
-    import { auth } from "../stores.js";
+    import { auth } from "../state.svelte.js";
     import { navigate } from "svelte-routing";
 
     let fridgeName = $state("New fridge name");
@@ -21,7 +20,7 @@
 
     async function createFridge() {
         const data = {
-            ownerID: get(auth).user.id,
+            ownerID: auth.user.id,
             name: fridgeName,
             wordList: words.split(",").map((w) => w.trim()),
             invitees: emails.map((e) => e.trim()),
@@ -35,7 +34,7 @@
             },
             body: JSON.stringify(data),
         });
-        navigate("/dashboard", { replace: true });
+        navigate("/", { replace: true });
     }
 </script>
 

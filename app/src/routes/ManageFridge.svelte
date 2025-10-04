@@ -1,10 +1,12 @@
 <script>
     import { Link, navigate } from "svelte-routing";
     import { onMount } from "svelte";
+    import { auth } from "../state.svelte.js";
 
     let { id } = $props();
     let fridge = $state({});
     let invitations = $state([]);
+    let newInviteEmail = $state("colorandcontrast@gmail.com");
     let wordList = $state([]);
     let deletingFridgeText = $state("");
     let isDeletingFridge = $state(false);
@@ -17,11 +19,7 @@
         });
         fridge = await fridgeResult.json();
 
-        const invitationsResult = await fetch(
-            `http://localhost:3000/invitations/fridge/${id}`,
-            { credentials: "include" }
-        );
-        invitations = await invitationsResult.json();
+        await refreshInvitations();
 
         const wordListResult = await fetch(
             `http://localhost:3000/words/${id}`,
@@ -29,6 +27,16 @@
         );
         wordList = await wordListResult.json();
     });
+
+    const refreshInvitations = async () => {
+        const result = await fetch(
+            `http://localhost:3000/invitations/fridge/${id}`,
+            {
+                credentials: "include",
+            }
+        );
+        invitations = await result.json();
+    };
 
     async function deleteFridge() {
         const result = await fetch(`http://localhost:3000/fridge/${id}`, {
@@ -38,7 +46,29 @@
                 "Content-Type": "application/json",
             },
         });
-        if (result) navigate("/dashboard", { replace: true });
+        if (result) navigate("/", { replace: true });
+    }
+
+    async function sendInvite() {
+        const data = {
+            fromID: auth.user.id,
+            toEmail: newInviteEmail,
+            fridgeID: id,
+        };
+
+        console.log("data", data);
+
+        const result = await fetch(`http://localhost:3000/invitations/send`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+        if (result) {
+            await refreshInvitations();
+        }
     }
 
     $effect(() => {
@@ -71,7 +101,11 @@
                 {/if}
             {/each}
             <div>
-                <input type="email" /><input type="button" value="send" />
+                <input type="email" bind:value={newInviteEmail} /><input
+                    type="button"
+                    value="send"
+                    onclick={() => sendInvite()}
+                />
             </div>
         </div>
 
@@ -100,5 +134,5 @@
         </div>
     {/if}
 
-    <Link to="/dashboard">Back to dashboard</Link>
+    <Link to="/">Back to dashboard</Link>
 </div>
