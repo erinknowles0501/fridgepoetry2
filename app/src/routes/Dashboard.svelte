@@ -3,7 +3,6 @@
     import { SvelteURL } from "svelte/reactivity";
 
     import { auth } from "../state.svelte.js";
-    // TODO Save user default display name and return it with user when login and use it here
     import Welcome from "./Welcome.svelte";
     import ManageFridge from "./ManageFridge.svelte";
     import Create from "./Create.svelte";

@@ -37,6 +37,8 @@ export async function isLoggedIn(req, res, next) {
     }
 }
 
+// TODO isVerified. There are a lot of things users can't do unless they've verified their email! Like accept invitations to fridges, make fridges, move words...anything, really. Perhaps isLoggedIn should be reconfigured to isValidUser..?
+
 export async function hasOpenInvitation(sessionUser, invitationID) {
     const invitation = await getInvitationByID(invitationID);
     console.log('invitation', invitation);
@@ -60,7 +62,7 @@ export async function isOwner(sessionUser, fridgeID) {
 }
 
 export async function isMember(sessionUser, fridgeID) {
-    const invitation = await getInvitationByDetails(sessionUser, fridgeID);
+    const invitation = await getInvitationByDetails(fridgeID, sessionUser.id);
     if (invitation && invitation.status == 'ACCEPTED') {
         return true;
     } else {
@@ -92,7 +94,7 @@ export async function isCurrentUser(sessionUser, userID) {
 //             next();
 //         } else {
 //             const error = new Error('Forbidden');
-//             error.status = 403; // TODO
+//             error.status = 403;
 //             throw error;
 //         }
 //     }

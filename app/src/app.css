@@ -15,6 +15,10 @@
     --lighttextcolor: light-dark(rgba(0, 0, 0, 0.6), rgba(255, 255, 255, 0.6));
     --bordercolor: light-dark(rgba(0, 0, 0, 0.1), rgba(255, 255, 255, 0.1));
     --darkbordercolor: light-dark(rgba(0, 0, 0, 0.3), rgba(255, 255, 255, 0.3));
+    --lightbordercolor: light-dark(
+        rgba(0, 0, 0, 0.07),
+        rgba(255, 255, 255, 0.07)
+    );
     background-color: var(--bgcolor);
     color: var(--textcolor);
 

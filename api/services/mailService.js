@@ -20,10 +20,34 @@ export async function sendVerificationEmail(email) {
     const sentMail = await transporter.sendMail({
         from: `"Fridge Poetry" <${process.env.SENDER_ADDRESS}>`,
         to: email,
-        subject: "Verify your email address for Fridge Poetry", // Subject line
+        subject: "Verify your email address for Fridge Poetry",
         text: `Click this link to verify your email address and get started! http://localhost:3000/verify/${token}`,
         html: `<p>Click this link to verify your email address and get started! <a href="http://localhost:3000/verify/${token}">Click here</a></p>`
     });
     console.log('sentMail', sentMail);
+}
+
+export async function sendInvitation(email, invitation) {
+    // TODO cooldown on emails sent.
+
+    try {
+        const sentMail = await transporter.sendMail({
+            from: `"Fridge Poetry <${process.env.SENDER_ADDRESS}>`,
+            to: email,
+            subject: `${invitation.fromDisplayName} invited you to join their fridge!`,
+            text: `${invitation.fromDisplayName} invited you to join their fridge, ${invitation.fridgeName}. Accept invitation: http://localhost:3000/invitations/accept/${invitation.id}   Decline invitation: http://localhost:3000/invitations/decline/${invitation.id}`,
+            html: `
+        <h1>${invitation.fromDisplayName} invited you to join their fridge, ${invitation.fridgeName}!</h1>
+        <p>To accept the invitation, <a href="http://localhost:3000/invitations/accept/${invitation.id}">Click here</a></p>
+        <p>To decline the invitation, <a href="http://localhost:3000/invitations/decline/${invitation.id}">Click here</a></p>
+        `
+        });
+        // TODO invitation.status = PENDING
+
+        console.log('sentMail', sentMail);
+    } catch (e) {
+        console.log('e', e);
+        // TODO invitation.status = FAILED
+    }
 
 }

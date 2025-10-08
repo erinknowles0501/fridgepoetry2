@@ -3,7 +3,7 @@
     import { auth } from "../state.svelte.js";
     import SetNameAndColor from "../components/SetNameAndColor.svelte";
 
-    auth.emailVerified = true;
+    auth.user.isVerified = true;
 
     let displayName = $state("");
     let currentColor = $state(0);

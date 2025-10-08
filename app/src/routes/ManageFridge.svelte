@@ -5,6 +5,7 @@
 
     let { id } = $props();
     let fridge = $state({});
+    let isOwner = $state(false);
     let invitations = $state([]);
     let newInviteEmail = $state("colorandcontrast@gmail.com");
     let wordList = $state([]);
@@ -19,7 +20,9 @@
         });
         fridge = await fridgeResult.json();
 
-        await refreshInvitations();
+        if (fridge.owner_id == auth.user.id) isOwner = true;
+
+        if (isOwner) await refreshInvitations();
 
         const wordListResult = await fetch(
             `http://localhost:3000/words/${id}`,
@@ -56,8 +59,6 @@
             fridgeID: id,
         };
 
-        console.log("data", data);
-
         const result = await fetch(`http://localhost:3000/invitations/send`, {
             method: "POST",
             credentials: "include",
@@ -93,45 +94,49 @@
             {fridge.lastChanged}
         </div>
 
-        <div>
-            <h3>Invitations</h3>
-            {#each invitations as invitation}
-                {#if invitation.status == "PENDING"}
-                    <div>{invitation.to}</div>
-                {/if}
-            {/each}
+        {#if isOwner}
             <div>
-                <input type="email" bind:value={newInviteEmail} /><input
-                    type="button"
-                    value="send"
-                    onclick={() => sendInvite()}
-                />
+                <h3>Invitations</h3>
+                {#each invitations as invitation}
+                    {#if invitation.status == "PENDING"}
+                        <div>{invitation.to}</div>
+                    {/if}
+                {/each}
+                <div>
+                    <input type="email" bind:value={newInviteEmail} /><input
+                        type="button"
+                        value="send"
+                        onclick={() => sendInvite()}
+                    />
+                </div>
             </div>
-        </div>
+        {/if}
 
         <div>
             <h3>Word list</h3>
             {wordList.map((word) => word.text)}
         </div>
 
-        <div>
-            {#if !isDeletingFridge}
-                <input
-                    type="button"
-                    font-color="red"
-                    onclick={() => (isDeletingFridge = true)}
-                    value="Delete?"
-                />
-            {:else}
-                <p>Type 'delete' to delete.</p>
-                <input
-                    type="text"
-                    font-color="red"
-                    bind:value={deletingFridgeText}
-                    bind:this={deleteRef}
-                />
-            {/if}
-        </div>
+        {#if isOwner}
+            <div>
+                {#if !isDeletingFridge}
+                    <input
+                        type="button"
+                        font-color="red"
+                        onclick={() => (isDeletingFridge = true)}
+                        value="Delete?"
+                    />
+                {:else}
+                    <p>Type 'delete' to delete.</p>
+                    <input
+                        type="text"
+                        font-color="red"
+                        bind:value={deletingFridgeText}
+                        bind:this={deleteRef}
+                    />
+                {/if}
+            </div>
+        {/if}
     {/if}
 
     <Link to="/">Back to dashboard</Link>

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { signupUser, loginUser } from '../services/authService.js';
+import { toCamel } from 'snake-camel';
 
 const router = Router();
 
@@ -15,11 +16,11 @@ router.post('/signup', async (req, res, next) => {
 
         const user = await signupUser(email, password);
         req.session.regenerate(() => {
-            req.session.user = { id: user.id, email: user.email, displayName: user.display_name, color: user.color, notifications: user.notifications };
+            req.session.user = toCamel(user);
         });
-        req.session.user = { id: user.id, email: user.email, displayName: user.display_name, color: user.color, notifications: user.notifications };
+        req.session.user = toCamel(user);
 
-        res.status(201).json({ id: user.id, email: user.email, displayName: user.display_name, color: user.color, notifications: user.notifications });
+        res.status(201).json(toCamel(user));
     } catch (err) {
         next(err);
     }
@@ -31,9 +32,11 @@ router.post('/login', async (req, res, next) => {
 
         const user = await loginUser(email, password);
         req.session.regenerate(() => {
-            req.session.user = { id: user.id, email: user.email, displayName: user.display_name, color: user.color, notifications: user.notifications };
+            req.session.user = toCamel(user);
+            console.log('req.session.user', req.session.user);
+
             req.session.save(() => {
-                res.json({ id: user.id, email: user.email, displayName: user.display_name, color: user.color, notifications: user.notifications });
+                res.json(toCamel(user));
             });
         });
     } catch (err) {

@@ -7,12 +7,24 @@
     let currentUser = auth.user;
 
     onMount(async () => {
+        await refreshFridges();
+    });
+
+    async function refreshFridges() {
         const fridgesResult = await fetch(
             `http://localhost:3000/fridges/list/${currentUser.id}`,
             { credentials: "include" }
         );
         fridges = await fridgesResult.json();
-    });
+    }
+
+    async function setInvite(status, inviteID) {
+        const fridgesResult = await fetch(
+            `http://localhost:3000/invitations/${status}/${inviteID}`,
+            { credentials: "include" }
+        );
+        await refreshFridges();
+    }
 </script>
 
 <div class="title-wrap">
@@ -22,14 +34,33 @@
 
 <div class="card-grid">
     {#each fridges as fridge}
-        <div class="card">
+        <div class="card {fridge.status == 'PENDING' ? 'pending' : ''}">
             <div class="details">
                 <h3>{fridge.name}</h3>
                 <div>Last changed</div>
             </div>
-            <div class="card-action-wrap">
-                <Link to="/manage/{fridge.id}">Manage</Link>
-                <Link to="/fridge/{fridge.id}">Go to fridge</Link>
+            <div
+                class="card-action-wrap {fridge.status == 'PENDING'
+                    ? 'pending'
+                    : ''}"
+            >
+                {#if !fridge.status || fridge.status == "ACCEPTED"}
+                    <Link to="/manage/{fridge.id}">Manage</Link>
+                    <Link to="/fridge/{fridge.id}">Go to fridge</Link>
+                {:else}
+                    <a
+                        href="/"
+                        onclick={() => setInvite("accept", fridge.invite_id)}
+                    >
+                        Accept
+                    </a>
+                    <a
+                        href="/"
+                        onclick={() => setInvite("decline", fridge.invite_id)}
+                    >
+                        Decline
+                    </a>
+                {/if}
             </div>
         </div>
     {/each}
@@ -44,5 +75,14 @@
 
     .title-wrap h2 {
         padding-right: 1.7rem;
+    }
+
+    .card.pending {
+        border: 3px dashed var(--lightbordercolor);
+        color: var(--lighttextcolor);
+    }
+
+    .card-action-wrap.pending {
+        border-top: 3px dashed var(--lightbordercolor);
     }
 </style>

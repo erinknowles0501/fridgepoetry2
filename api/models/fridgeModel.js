@@ -1,6 +1,7 @@
 import prodDB from '../db.js';
 import { createWordsIfNotExist, getWordIDsFromList, createFridgeWords, deleteFridgeWordsByFridgeID } from './wordModel.js';
 import { deleteSettingByFridgeID } from './settingModel.js';
+import { deleteInvitationsByFridgeID } from './invitationModel.js';
 
 export async function getFridgeById(id, db = prodDB) {
     const result = await db.query(`SELECT * FROM fridge WHERE id = $1`, [id]);
@@ -43,7 +44,7 @@ export async function deleteFridge(id, db = prodDB) {
         await db.query('BEGIN;');
         await deleteFridgeWordsByFridgeID(id);
         // TODO? Delete words used only by this fridge? 
-        // TODO Delete invitations to this fridge
+        await deleteInvitationsByFridgeID(id);
         await deleteSettingByFridgeID(id);
         await db.query(`DELETE FROM fridge WHERE id = $1`, [id]);
         await db.query('COMMIT;');
@@ -55,4 +56,20 @@ export async function deleteFridge(id, db = prodDB) {
     }
 
     return success;
+}
+
+export async function getFridgeUsersToDisplay(fridgeID, db = prodDB) {
+    const result = await db.query(`SELECT user_invitation.to_id, COALESCE (setting.display_name, users.display_name) AS display_name FROM user_invitation
+            INNER JOIN users ON user_invitation.to_id = users.id
+            LEFT JOIN setting ON user_invitation.to_id = setting.user_id
+            WHERE user_invitation.status = 'ACCEPTED'
+            AND user_invitation.fridge_id = $1
+            UNION ALL
+            SELECT fridge.owner_id, COALESCE(setting.display_name, users.display_name) AS display_name FROM fridge
+            INNER JOIN users ON fridge.owner_id = users.id
+            LEFT JOIN setting ON fridge.owner_id = setting.user_id
+            WHERE fridge.id = $1
+            `, [fridgeID]);
+
+    return result.rows;
 }

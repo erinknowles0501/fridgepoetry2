@@ -3,7 +3,7 @@ import prodDB from '../db.js';
 
 export async function getUserByEmail(email, db = prodDB) {
     const result = await db.query(
-        `SELECT users.id, users.email_id, users.passhash, users.created_at, users.display_name, users.color, users.notifications, email.email FROM users 
+        `SELECT users.id, users.email_id, users.passhash, users.created_at, users.display_name, users.color, users.notifications, email.email, email.is_verified FROM users 
         INNER JOIN email ON users.email_id = email.id
         WHERE email.email = $1`,
         [email]
