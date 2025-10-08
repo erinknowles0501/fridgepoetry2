@@ -1,5 +1,5 @@
 import session from 'express-session';
-import { getFridgeById } from './models/fridgeModel.js';
+import { getFridgeByID } from './models/fridgeModel.js';
 import { getInvitationByID, getInvitationByDetails } from './models/invitationModel.js';
 
 export default session({
@@ -41,24 +41,19 @@ export async function isLoggedIn(req, res, next) {
 
 export async function hasOpenInvitation(sessionUser, invitationID) {
     const invitation = await getInvitationByID(invitationID);
-    console.log('invitation', invitation);
 
     if (invitation.status == 'PENDING' && invitation.to_id == sessionUser.id) {
         return true;
     } else {
-        const error = new Error('Not owner of this resource');
+        const error = new Error(`User ${sessionUser.id} does not have invitation ${invitationID}`);
         error.status = 401;
         throw error;
     }
 }
 
-export async function isOwner(sessionUser, fridgeID) {
-    const fridge = await getFridgeById(fridgeID);
-    if (fridge.owner_id == sessionUser.id) {
-        return true;
-    } else {
-        return false;
-    }
+export async function isOwner(userID, fridgeID) {
+    const fridge = await getFridgeByID(fridgeID);
+    return fridge.owner_id == userID;
 }
 
 export async function isMember(sessionUser, fridgeID) {
@@ -66,16 +61,21 @@ export async function isMember(sessionUser, fridgeID) {
     if (invitation && invitation.status == 'ACCEPTED') {
         return true;
     } else {
-        const error = new Error('Not member of this resource');
+        const error = new Error(`User ${sessionUser.id} is not a member of fridge ${fridgeID} (does not have an accepted invitation)`);
         error.status = 401;
         throw error;
     }
 }
 
+export async function hasAnyInvitationToFridge(userID, fridgeID) {
+    const invitation = await getInvitationByDetails(fridgeID, userID);
+    return !!invitation;
+}
+
 export async function isCurrentUser(sessionUser, userID) {
     if (sessionUser.id == userID) return true;
     else {
-        const error = new Error('Not owner of this resource');
+        const error = new Error(`Current user (${sessionUser.id}) does not match needed userID (${userID})`);
         error.status = 403;
         throw error;
     }

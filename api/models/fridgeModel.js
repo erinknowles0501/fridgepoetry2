@@ -3,7 +3,7 @@ import { createWordsIfNotExist, getWordIDsFromList, createFridgeWords, deleteFri
 import { deleteSettingByFridgeID } from './settingModel.js';
 import { deleteInvitationsByFridgeID } from './invitationModel.js';
 
-export async function getFridgeById(id, db = prodDB) {
+export async function getFridgeByID(id, db = prodDB) {
     const result = await db.query(`SELECT * FROM fridge WHERE id = $1`, [id]);
     return result.rows[0];
 }

@@ -11,6 +11,15 @@ export async function getUserByEmail(email, db = prodDB) {
     return result.rows[0];
 }
 
+export async function getShadowUserByEmail(email, db = prodDB) {
+    const result = await db.query(
+        `SELECT * FROM shadow_user 
+        WHERE email = $1`,
+        [email]
+    );
+    return result.rows[0];
+}
+
 export async function createUser(body, db = prodDB) {
     const emailResult = (await db.query(`INSERT INTO email (email, is_verified) VALUES ($1, 'false') RETURNING *`, [body.email])).rows[0];
     const result = await db.query(

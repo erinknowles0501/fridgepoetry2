@@ -6,8 +6,11 @@ export async function getInvitationByID(invitationID, db = prodDB) {
 }
 
 export async function getInvitationByDetails(fridgeID, userID, db = prodDB) {
-    const result = await db.query(`SELECT * FROM user_invitation WHERE fridge_id = $1
-        AND to_id = $2`, [fridgeID, userID]);
+    // TODO: I think you can use this when refactoring invitations/send to check whether an email has already been invited?
+    const result = await db.query(`SELECT *, 'false' as is_shadow FROM user_invitation WHERE fridge_id = $1
+        AND to_id = $2
+        UNION ALL
+        SELECT *, 'true' as is_shadow FROM invitation_to_unknown WHERE fridge_id = $1 and to_id = $2`, [fridgeID, userID]);
     return result.rows[0];
 }
 
@@ -17,6 +20,8 @@ export async function createInvitation(toEmail, fromID, fridgeID, db = prodDB) {
     // if it isn't, check if it's in shadow_user
     //   if it isn't, create a shadow user with that email
     //   either way, create invitation_to_unknown invite
+
+    // TODO move the existing user / existing shadow user stuff to invitations? Or somewhere? Because we need it to check whether the person has already been invited. Currently we're doing these queries twice.
     let table, userID;
 
     const existingUser = (await db.query(`SELECT users.id, users.email_id, users.display_name, email.email, email.is_verified FROM users

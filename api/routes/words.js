@@ -5,7 +5,7 @@ import { isLoggedIn, isOwner, isMember } from '../authorization.js';
 const router = Router();
 
 router.get('/:fridgeID', isLoggedIn, async (req, res) => {
-    if (!(await isOwner(req.session.user, req.params.fridgeID)) && !(await isMember(req.session.user, req.params.fridgeID))) {
+    if (!(await isOwner(req.session.user.id, req.params.fridgeID)) && !(await isMember(req.session.user, req.params.fridgeID))) {
         const error = new Error(`User ${req.session.user.id} is not permitted to GET words of fridge ${req.params.fridgeID}`);
         error.status = 403;
         throw error;

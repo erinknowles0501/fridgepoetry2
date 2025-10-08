@@ -1,8 +1,9 @@
 import { Router } from "express";
 import { getInvitationByID, getOpenInvitationsByFridge, getOpenInvitationsByUser, setInvitation, createInvitation } from "../models/invitationModel.js";
-import { isLoggedIn, isCurrentUser, isOwner } from "../authorization.js";
+import { isLoggedIn, isCurrentUser, isOwner, hasAnyInvitationToFridge } from "../authorization.js";
 import { sendInvitation } from "../services/mailService.js";
-import { getFridgeById, getFridgeUsersToDisplay } from "../models/fridgeModel.js";
+import { getFridgeByID, getFridgeUsersToDisplay } from "../models/fridgeModel.js";
+import { getShadowUserByEmail, getUserByEmail } from "../models/userModel.js";
 
 const router = Router();
 
@@ -18,7 +19,7 @@ router.get('/user/:userID', isLoggedIn, async (req, res) => {
 });
 
 router.get('/fridge/:fridgeID', isLoggedIn, async (req, res) => {
-    if (!(await isOwner(req.session.user, req.params.fridgeID))) {
+    if (!(await isOwner(req.session.user.id, req.params.fridgeID))) {
         const error = new Error(`User ${req.session.user.id} is not permitted to GET invitations of fridge ${req.params.fridgeID}`);
         error.status = 403;
         throw error;
@@ -29,7 +30,7 @@ router.get('/fridge/:fridgeID', isLoggedIn, async (req, res) => {
 });
 
 router.get('/accept/:inviteID', isLoggedIn, async (req, res) => {
-    // TODO: If not logged in, redirect to frontend /login&invite={id}. Carry the invite throughout and once logged in / signed up, accept/decline.
+    // TODO: If not logged in, redirect to frontend /login&invite={id}&status=accept. Carry the invite throughout and once logged in / signed up, accept/decline.
     const invitation = await getInvitationByID(req.params.inviteID);
     console.log('invitation', invitation);
 
@@ -56,25 +57,39 @@ router.get('/decline/:inviteID', isLoggedIn, async (req, res) => {
 });
 
 router.post('/send', isLoggedIn, async (req, res) => {
-    // TODO
-    /*
-    auth:
-        isLoggedIn
-        is 'from' current session user
-        isOwner of invite's fridgeID
-        invitation 'to' is not already invited to this fridge (pending, accepted, or declined) AND is not fridge owner
-            Right now this encompasses everyone already using the fridge. In the future (if we implement changing fridge owner, or permissions to let members invite other members) we might have to be smarter.
-        fridge exists and not already at max capacity
-  */
-    console.log('req.body', req.body);
+    if (!(await isCurrentUser(req.session.user, req.body.fromID))) {
+        const error = new Error(`Can not send invitation from a different user. Tried to send as: ${req.body.fromID}. You: ${req.session.user.id}`);
+        error.status = 403;
+        throw error;
+    }
 
-    const fridge = await getFridgeById(req.body.fridgeID);
+    if (!(await isOwner(req.session.user.id, req.body.fridgeID))) {
+        const error = new Error(`Can not send invitation: you (${req.session.user.id}) are not the owner of this fridge (${req.body.fridgeID}).`);
+        error.status = 403;
+        throw error;
+    }
+
+    const existingUser = await getUserByEmail(req.body.toEmail);
+    const existingShadowUser = await getShadowUserByEmail(req.body.toEmail);
+
+    if (existingUser && (await isOwner(existingUser.id, req.body.fridgeID))) {
+        const error = new Error(`Can not send invitation: invited user (${existingUser.id}) is already the owner of this fridge (${req.body.fridgeID}).`);
+        error.status = 403;
+        throw error;
+    }
+
+    if ((existingUser && await hasAnyInvitationToFridge(existingUser.id, req.body.fridgeID)) || (existingShadowUser && await hasAnyInvitationToFridge(existingShadowUser.id, req.body.fridgeID))) {
+        const error = new Error(`Can not send invitation: invited user (${req.body.toEmail}, which is a ${existingUser ? 'existing' : 'shadow'} user) is already invited to this fridge (${req.body.fridgeID}). They may have accepted or declined, or it may still be pending.`);
+        error.status = 403;
+        throw error;
+    }
+    // TODO check fridge not at capacity
+
+    const fridge = await getFridgeByID(req.body.fridgeID);
     const fromUsers = await getFridgeUsersToDisplay(req.body.fridgeID);
-    console.log('fromUsers', fromUsers);
 
     // TODO: Jobs queue - invitation status set to 'SENDING', queue runs on a separate process and checks for invitations with SENDING statuses and tries them, eventually setting to FAILED if continues to fail. Also add col num_failures (or failures col which is just array of JSON objects/strings to capture the errors over time. Length = num_failures) to capture the number of times an invite has been tried to be sent so it can start at the earliest SENDING status and go through to the most recent invitation, then start again at the top.
     const invitation = await createInvitation(req.body.toEmail, req.body.fromID, req.body.fridgeID);
-    console.log('invitation', invitation);
 
     invitation.fridgeName = fridge.name;
     invitation.fromDisplayName = fromUsers.filter(user => user.to_id == req.body.fromID).display_name;

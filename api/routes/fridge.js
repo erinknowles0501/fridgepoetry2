@@ -1,22 +1,22 @@
 import { Router } from 'express';
-import { getFridgeById, updateFridge, createFridge, deleteFridge } from '../models/fridgeModel.js';
+import { getFridgeByID, updateFridge, createFridge, deleteFridge } from '../models/fridgeModel.js';
 import { isLoggedIn, isOwner, isMember } from '../authorization.js';
 
 const router = Router();
 
 router.get('/:fridgeID', isLoggedIn, async (req, res) => {
-    if (!(await isOwner(req.session.user, req.params.fridgeID)) && !(await isMember(req.session.user, req.params.fridgeID))) {
+    if (!(await isOwner(req.session.user.id, req.params.fridgeID)) && !(await isMember(req.session.user, req.params.fridgeID))) {
         const error = new Error(`User ${req.session.user.id} is not permitted to GET fridge ${req.params.fridgeID}`);
         error.status = 403;
         throw error;
     }
 
-    const result = await getFridgeById(req.params.fridgeID);
+    const result = await getFridgeByID(req.params.fridgeID);
     res.json(result);
 });
 
 router.patch('/:fridgeID', isLoggedIn, async (req, res) => {
-    if (!(await isOwner(req.session.user, req.params.fridgeID))) {
+    if (!(await isOwner(req.session.user.id, req.params.fridgeID))) {
         const error = new Error(`User ${req.session.user.id} is not permitted to PATCH fridge ${req.params.fridgeID}`);
         error.status = 403;
         throw error;
@@ -37,7 +37,7 @@ router.put('/', isLoggedIn, async (req, res) => {
 });
 
 router.delete('/:fridgeID', isLoggedIn, async (req, res) => {
-    if (!(await isOwner(req.session.user, req.params.fridgeID))) {
+    if (!(await isOwner(req.session.user.id, req.params.fridgeID))) {
         const error = new Error(`User ${req.session.user.id} is not permitted to DELETE fridge ${req.params.fridgeID}`);
         error.status = 403;
         throw error;

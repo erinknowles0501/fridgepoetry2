@@ -3,7 +3,7 @@
     import { Link } from "svelte-routing";
     import { auth } from "../state.svelte.js";
 
-    let fridges = $state([]);
+    let fridges = $state([]); // TODO sort by pending invites first, then lastChanged
     let currentUser = auth.user;
 
     onMount(async () => {

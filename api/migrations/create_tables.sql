@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email_id UUID NOT NULL,
+  email_id UUID NOT NULL UNIQUE,
   passhash VARCHAR NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   display_name TEXT CHECK (display_name != ''),
@@ -31,18 +31,19 @@ CREATE TABLE IF NOT EXISTS fridge_word (
   last_moved_by UUID,
   FOREIGN KEY (fridge_id) REFERENCES fridge(id),
   FOREIGN KEY (word_id) REFERENCES word(id),
-  FOREIGN KEY (last_moved_by) REFERENCES users(id)
+  FOREIGN KEY (last_moved_by) REFERENCES users(id),
+  UNIQUE (fridge_id, word_id)
 );
 
 CREATE TABLE IF NOT EXISTS email (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
   is_verified TEXT NOT NULL CHECK (is_verified IN ('true', 'false', 'pending'))
 );
 
 CREATE TABLE IF NOT EXISTS shadow_user (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    email TEXT NOT NULL
+    email TEXT NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS invitation_to_unknown (
@@ -54,7 +55,8 @@ CREATE TABLE IF NOT EXISTS invitation_to_unknown (
     created_at TIMESTAMPTZ DEFAULT NOW(),
     FOREIGN KEY (fridge_id) REFERENCES fridge(id),
     FOREIGN KEY (from_id) REFERENCES users(id),
-    FOREIGN KEY (to_id) REFERENCES shadow_user(id)
+    FOREIGN KEY (to_id) REFERENCES shadow_user(id),
+    UNIQUE (fridge_id, to_id)
 );
 
 CREATE TABLE IF NOT EXISTS user_invitation (
@@ -66,7 +68,8 @@ CREATE TABLE IF NOT EXISTS user_invitation (
     created_at TIMESTAMPTZ DEFAULT NOW(),
     FOREIGN KEY (fridge_id) REFERENCES fridge(id),
     FOREIGN KEY (from_id) REFERENCES users(id),
-    FOREIGN KEY (to_id) REFERENCES users(id)
+    FOREIGN KEY (to_id) REFERENCES users(id),
+    UNIQUE (fridge_id, to_id)
 );
 
 CREATE TABLE IF NOT EXISTS setting (
@@ -77,5 +80,6 @@ CREATE TABLE IF NOT EXISTS setting (
     color INT,
     notifications BOOLEAN,
     FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (fridge_id) REFERENCES fridge(id)
+    FOREIGN KEY (fridge_id) REFERENCES fridge(id),
+    UNIQUE (user_id, fridge_id)
 );
