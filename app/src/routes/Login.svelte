@@ -2,11 +2,18 @@
     import { onMount } from "svelte";
     import { navigate } from "svelte-routing";
     import { auth } from "../state.svelte.js";
+    import { SvelteURL } from "svelte/reactivity";
+    import { addToast } from "../toasts.svelte.js";
 
     let email = $state("erinknowles@protonmail.com");
-    let confirmEmail = $state("");
     let password = $state("password");
+    let confirmPassword = $state("");
     let isSigningUp = $state(false);
+    let inviteID = new SvelteURL(window.location).searchParams.get("invite");
+    let inviteStatus = new SvelteURL(window.location).searchParams.get(
+        "status"
+    );
+    console.log("inviteID", inviteID, inviteStatus);
 
     let loginRef;
 
@@ -14,35 +21,73 @@
         e.preventDefault();
 
         // TODO validation
+        if (isSigningUp && password != confirmPassword) {
+            addToast("Passwords do not match!");
+            return;
+        }
 
         const data = {
             email: email,
             password: password,
         };
 
-        fetch(
-            `http://localhost:3000/auth/${isSigningUp ? "signup" : "login"}`,
-            {
-                method: "POST",
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(data),
-            }
-        )
-            .then((res) => {
-                res.json().then((data) => {
-                    auth.user = data;
-                    navigate(isSigningUp ? "/awaitConfirmSignup" : "/", {
-                        replace: true,
-                    });
-                });
-            })
-            .catch((e) => console.log(e));
+        // if (inviteID && isSigningUp) data.invite = inviteID;
+
+        let navigateString = isSigningUp ? "/awaitConfirmSignup" : "/";
+        navigateString +=
+            inviteID && inviteStatus
+                ? `?invite=${inviteID}&status=${inviteStatus}`
+                : "";
+        console.log("navigateString", navigateString);
+
+        const result = await (
+            await fetch(
+                `http://localhost:3000/auth/${isSigningUp ? "signup" : "login"}`,
+                {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                }
+            )
+        ).json();
+
+        if (!result.failed) {
+            auth.user = data;
+            navigate(navigateString, {
+                replace: true,
+            });
+        } else {
+            addToast(result.message);
+        }
     }
 
-    onMount(() => loginRef.focus());
+    onMount(async () => {
+        loginRef.focus();
+        if (inviteID) {
+            isSigningUp = true;
+
+            const result = await (
+                await fetch(
+                    `http://localhost:3000/invitations/id/${inviteID}`,
+                    {
+                        method: "GET",
+                        credentials: "include",
+                        headers: { "Content-Type": "application/json" },
+                    }
+                )
+            ).json();
+
+            if (!result.failed) {
+                email = data.to_email;
+                console.log("current user", data);
+            } else {
+                addToast(result.message);
+            }
+        }
+    });
 </script>
 
 <header>
@@ -58,12 +103,18 @@
             bind:value={email}
             bind:this={loginRef}
         />
-        {#if isSigningUp}
-            <label for="confirm-email">Confirm Email:</label>
-            <input id="confirm-email" type="email" bind:value={confirmEmail} />
-        {/if}
+
         <label for="password">Password:</label>
         <input id="password" type="password" bind:value={password} />
+
+        {#if isSigningUp}
+            <label for="confirm-password">Confirm Password:</label>
+            <input
+                id="confirm-password"
+                type="password"
+                bind:value={confirmPassword}
+            />
+        {/if}
 
         <div class="form-bottom">
             <input

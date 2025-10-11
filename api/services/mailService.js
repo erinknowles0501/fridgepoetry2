@@ -35,11 +35,11 @@ export async function sendInvitation(email, invitation) {
             from: `"Fridge Poetry <${process.env.SENDER_ADDRESS}>`,
             to: email,
             subject: `${invitation.fromDisplayName} invited you to join their fridge!`,
-            text: `${invitation.fromDisplayName} invited you to join their fridge, ${invitation.fridgeName}. Accept invitation: http://localhost:3000/invitations/accept/${invitation.id}   Decline invitation: http://localhost:3000/invitations/decline/${invitation.id}`,
+            text: `${invitation.fromDisplayName} invited you to join their fridge, ${invitation.fridgeName}. Accept invitation: http://localhost:3000/invitations/accept/${invitation.id}?redirect=true   Decline invitation: http://localhost:3000/invitations/decline/${invitation.id}?redirect=true`,
             html: `
         <h1>${invitation.fromDisplayName} invited you to join their fridge, ${invitation.fridgeName}!</h1>
-        <p>To accept the invitation, <a href="http://localhost:3000/invitations/accept/${invitation.id}">Click here</a></p>
-        <p>To decline the invitation, <a href="http://localhost:3000/invitations/decline/${invitation.id}">Click here</a></p>
+        <p>To accept the invitation, <a href="http://localhost:3000/invitations/accept/${invitation.id}?redirect=true">Click here</a></p>
+        <p>To decline the invitation, <a href="http://localhost:3000/invitations/decline/${invitation.id}?redirect=true">Click here</a></p>
         `
         });
         // TODO invitation.status = PENDING

@@ -1,6 +1,7 @@
 import session from 'express-session';
 import { getFridgeByID } from './models/fridgeModel.js';
 import { getInvitationByID, getInvitationByDetails } from './models/invitationModel.js';
+import { getUserByEmail } from './models/userModel.js';
 
 export default session({
     resave: false, // don't save session if unmodified
@@ -29,15 +30,13 @@ export default session({
 // TODO: isOwnerMiddleware, isOwnerOrMemberMiddleware, isCurrentUserMiddleware Both of those are used often enough in pretty much exactly the same way. Have to look into it, but I think it would be handy to be able to call them in other ways too from within routes that aren't using them the standard way.
 
 export async function isLoggedIn(req, res, next) {
-    if (req.session.user) return next();
+    if (req.session.user && req.session.user.isVerified == 'true') return next();
     else {
-        const error = new Error('Not logged in');
+        const error = new Error('Not logged in or email not verified');
         error.status = 401;
         throw error;
     }
 }
-
-// TODO isVerified. There are a lot of things users can't do unless they've verified their email! Like accept invitations to fridges, make fridges, move words...anything, really. Perhaps isLoggedIn should be reconfigured to isValidUser..?
 
 export async function hasOpenInvitation(sessionUser, invitationID) {
     const invitation = await getInvitationByID(invitationID);

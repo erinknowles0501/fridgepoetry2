@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS fridge_word (
 CREATE TABLE IF NOT EXISTS email (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT NOT NULL UNIQUE,
-  is_verified TEXT NOT NULL CHECK (is_verified IN ('true', 'false', 'pending'))
+  is_verified BOOLEAN NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS shadow_user (

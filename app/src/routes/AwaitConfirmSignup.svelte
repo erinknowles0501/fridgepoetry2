@@ -1,5 +1,6 @@
 <script>
     import Magnet from "../components/Magnet.svelte";
+    import { auth } from "../state.svelte.js";
 </script>
 
 <header>
@@ -12,7 +13,7 @@
     <Magnet text="...!" />
 
     <p>
-        An email has been sent to <b>TODO</b> with a link to click to confirm your
-        email so you can finish signing up.
+        An email has been sent to <b>{auth.user.email}</b> with a link to click to
+        confirm your email so you can finish signing up. You may close this page.
     </p>
 </main>

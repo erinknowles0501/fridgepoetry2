@@ -19,6 +19,7 @@ router.post('/signup', async (req, res, next) => {
             req.session.user = toCamel(user);
         });
         req.session.user = toCamel(user);
+        // TODO I don't like how I'm returning user.passhash and user.email. 
 
         res.status(201).json(toCamel(user));
     } catch (err) {
@@ -37,6 +38,7 @@ router.post('/login', async (req, res, next) => {
 
             req.session.save(() => {
                 res.json(toCamel(user));
+                // TODO I don't like how I'm returning user.passhash and user.email. 
             });
         });
     } catch (err) {

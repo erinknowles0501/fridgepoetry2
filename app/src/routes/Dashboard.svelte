@@ -8,30 +8,37 @@
     import Create from "./Create.svelte";
 
     let { url } = $props();
-    let pathname = new SvelteURL(window.location).pathname;
+    let pathname = $state(getPathname());
+    console.log("pathname", pathname);
+
+    function getPathname() {
+        return window.location.pathname;
+    }
 
     async function onclick(e) {
         e.preventDefault();
 
-        fetch("http://localhost:3000/auth/logout", {
-            method: "POST",
-            credentials: "include",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        })
-            .then((res) => {
-                res.json().then((data) => {
-                    auth.user = null;
-                    navigate("/", { replace: true });
-                });
+        const result = await (
+            await fetch("http://localhost:3000/auth/logout", {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
             })
-            .catch((e) => console.log(e));
+        ).json();
+
+        if (!result.failed) {
+            auth.user = null;
+            navigate("/", { replace: true });
+        } else {
+            addToast(result.message);
+        }
     }
 </script>
 
 <header>
-    {#if pathname == "/manage" || pathname == "/create"}
+    {#if pathname.includes("/manage") || pathname.includes("/create")}
         <Link to="/">&lt;- Back to main</Link>
     {/if}
     <div class="header-wrap">

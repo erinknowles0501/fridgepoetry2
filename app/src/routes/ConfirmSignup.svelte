@@ -13,7 +13,7 @@
     const email = params.get("email");
     const userID = params.get("user");
 
-    function submit() {
+    async function submit() {
         const data = {
             displayName,
             color: currentColor,
@@ -23,18 +23,23 @@
 
         console.log("data", data);
 
-        fetch(`http://localhost:3000/user/${userID}`, {
-            method: "PATCH",
-            credentials: "include",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
-        }).then(async (result) => {
+        const result = await (
+            await fetch(`http://localhost:3000/user/${userID}`, {
+                method: "PATCH",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            })
+        ).json();
+        if (!result.failed) {
             const user = await result.json();
             auth.user = user;
             navigate("/", { replace: true });
-        });
+        } else {
+            addToast(result.message);
+        }
     }
 </script>
 

@@ -26,7 +26,7 @@ export async function createUser(body, db = prodDB) {
         'INSERT INTO users (email_id, passhash) VALUES ($1, $2) RETURNING *',
         [emailResult.id, body.passhash]
     );
-    return result.rows[0];
+    return { ...result.rows[0], ...emailResult };
 }
 
 export async function updateUserDefaults(userID, body, db = prodDB) {

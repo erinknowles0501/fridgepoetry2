@@ -18,7 +18,7 @@ mountRoutes(app);
 
 app.use((err, req, res, next) => {
     console.error(err.status, err.stack)
-    res.status(err.status || 500).json({ success: false, message: err.message })
+    res.status(err.status || 500).json({ failed: true, message: err.message })
 })
 
 app.get('/', (req, res) => {

@@ -5,6 +5,8 @@
     import Dashboard from "./routes/Dashboard.svelte";
     import ConfirmSignup from "./routes/ConfirmSignup.svelte";
     import AwaitConfirmSignup from "./routes/AwaitConfirmSignup.svelte";
+    import Toasts from "./components/Toasts.svelte";
+    import { addToast } from "./toasts.svelte.js";
 
     import { auth } from "./state.svelte.js";
 
@@ -15,19 +17,38 @@
                 credentials: "include",
             })
         ).json();
-        console.log("result", result);
-        if (result.isLoggedIn) {
-            auth.user = result.user;
-        }
+        console.log("current user:", result);
+        if (!result.failed) {
+            if (result.isLoggedIn) {
+                auth.user = result.user;
+            }
+        } else addToast(result.message);
     });
 </script>
 
 <div>
+    <Toasts />
     <Router>
-        <Route path="/awaitConfirmSignup"><AwaitConfirmSignup /></Route>
-        <Route path="/confirmSignup"><ConfirmSignup /></Route>
+        <Route path="/awaitConfirmSignup">
+            {#if auth.user && auth.user.isVerified == "false"}
+                <AwaitConfirmSignup />
+            {:else if auth.user && auth.user.isVerified == "true"}
+                <Dashboard />
+            {:else}
+                <Login />
+            {/if}
+        </Route>
+        <Route path="/confirmSignup">
+            {#if auth.user && auth.user.isVerified == "true" && !auth.user.displayName}
+                <ConfirmSignup />
+            {:else if auth.user && auth.user.isVerified == "true" && auth.user.displayName}
+                <Dashboard />
+            {:else}
+                <Login />
+            {/if}
+        </Route>
         <Route path="/*">
-            {#if auth.user}
+            {#if auth.user && auth.user.isVerified == "true"}
                 <Dashboard />
             {:else}
                 <Login />

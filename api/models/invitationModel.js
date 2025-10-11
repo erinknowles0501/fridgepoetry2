@@ -1,7 +1,14 @@
 import prodDB from '../db.js';
 
 export async function getInvitationByID(invitationID, db = prodDB) {
-    const result = await db.query(`SELECT * FROM user_invitation WHERE id = $1`, [invitationID]);
+    const result = await db.query(`SELECT ui.*, email.email AS to_email, 'user' AS to_type FROM user_invitation ui
+        INNER JOIN users ON ui.to_id = users.id
+        INNER JOIN email ON users.email_id = email.id
+        WHERE ui.id = $1
+        UNION ALL
+        SELECT iu.*, shadow_user.email AS to_email, 'shadow' AS to_type FROM invitation_to_unknown iu
+        INNER JOIN shadow_user ON iu.to_id = shadow_user.id
+        WHERE iu.id = $1`, [invitationID]);
     return result.rows[0];
 }
 
@@ -64,7 +71,7 @@ export async function deleteInvitationsByFridgeID(fridgeID, db = prodDB) {
     const resultUnknown = await db.query(`DELETE FROM invitation_to_unknown WHERE fridge_id = $1`, [fridgeID]);
 }
 
-export async function getOpenInvitationsByFridge(fridgeID, db = prodDB) {
+export async function getInvitationsByFridge(fridgeID, db = prodDB) {
     // Also returns DECLINED for reasons of not re-inviting someone who has declined an invite.
 
     const emailResult = await db.query(`SELECT to_id, invitation_to_unknown.created_at, email, status FROM invitation_to_unknown 
@@ -73,7 +80,7 @@ export async function getOpenInvitationsByFridge(fridgeID, db = prodDB) {
     const userResult = await db.query(`SELECT to_id, user_invitation.created_at, email, status FROM user_invitation 
     INNER JOIN users ON user_invitation.to_id = users.id
     INNER JOIN email ON users.email_id = email.id
-    WHERE fridge_id = $1 AND status IN ('PENDING', 'DECLINED')`, [fridgeID]);
+    WHERE fridge_id = $1`, [fridgeID]);
 
     const result = [...emailResult.rows, ...userResult.rows].map(invite => {
         return { to: invite.email, createdAt: invite.created_at, status: invite.status }

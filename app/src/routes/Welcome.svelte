@@ -2,6 +2,7 @@
     import { onMount } from "svelte";
     import { Link } from "svelte-routing";
     import { auth } from "../state.svelte.js";
+    import { addToast } from "../toasts.svelte.js";
 
     let fridges = $state([]); // TODO sort by pending invites first, then lastChanged
     let currentUser = auth.user;
@@ -11,19 +12,25 @@
     });
 
     async function refreshFridges() {
-        const fridgesResult = await fetch(
-            `http://localhost:3000/fridges/list/${currentUser.id}`,
-            { credentials: "include" }
-        );
-        fridges = await fridgesResult.json();
+        const fridgesResult = await (
+            await fetch(
+                `http://localhost:3000/fridges/list/${currentUser.id}`,
+                { credentials: "include" }
+            )
+        ).json();
+        if (!fridgesResult.failed) fridges = fridgesResult;
+        else addToast(fridgesResult.message);
     }
 
     async function setInvite(status, inviteID) {
-        const fridgesResult = await fetch(
-            `http://localhost:3000/invitations/${status}/${inviteID}`,
-            { credentials: "include" }
-        );
-        await refreshFridges();
+        const result = await (
+            await fetch(
+                `http://localhost:3000/invitations/${status}/${inviteID}`,
+                { credentials: "include" }
+            )
+        ).json();
+        if (!result.failed) await refreshFridges();
+        else addToast(result.message);
     }
 </script>
 

@@ -1,5 +1,6 @@
 <script>
     import { auth } from "../state.svelte.js";
+    import { addToast } from "../toasts.svelte.js";
     import { navigate } from "svelte-routing";
 
     let fridgeName = $state("New fridge name");
@@ -34,7 +35,8 @@
             },
             body: JSON.stringify(data),
         });
-        navigate("/", { replace: true });
+        if (!result.failed) navigate("/", { replace: true });
+        else addToast(result.message);
     }
 </script>
 
