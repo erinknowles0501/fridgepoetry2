@@ -55,7 +55,7 @@
         ).json();
 
         if (!result.failed) {
-            auth.user = data;
+            auth.user = result;
             navigate(navigateString, {
                 replace: true,
             });

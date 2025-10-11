@@ -30,10 +30,11 @@
 
         if (isOwner) await refreshInvitations();
 
-        const wordListResult = await await fetch(
-            `http://localhost:3000/words/${id}`,
-            { credentials: "include" }
-        );
+        const wordListResult = await (
+            await fetch(`http://localhost:3000/words/${id}`, {
+                credentials: "include",
+            })
+        ).json();
         if (wordListResult.failed) {
             addToast(wordListResult.message);
             return;

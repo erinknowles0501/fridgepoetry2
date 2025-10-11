@@ -5,6 +5,7 @@
     import Dashboard from "./routes/Dashboard.svelte";
     import ConfirmSignup from "./routes/ConfirmSignup.svelte";
     import AwaitConfirmSignup from "./routes/AwaitConfirmSignup.svelte";
+    import Fridge from "./routes/Fridge.svelte";
     import Toasts from "./components/Toasts.svelte";
     import { addToast } from "./toasts.svelte.js";
 
@@ -28,37 +29,41 @@
 
 <div>
     <Toasts />
-    <Router>
-        <Route path="/awaitConfirmSignup">
-            {#if auth.user && auth.user.isVerified == "false"}
-                <AwaitConfirmSignup />
-            {:else if auth.user && auth.user.isVerified == "true"}
-                <Dashboard />
-            {:else}
-                <Login />
-            {/if}
-        </Route>
-        <Route path="/confirmSignup">
-            {#if auth.user && auth.user.isVerified == "true" && !auth.user.displayName}
-                <ConfirmSignup />
-            {:else if auth.user && auth.user.isVerified == "true" && auth.user.displayName}
-                <Dashboard />
-            {:else}
-                <Login />
-            {/if}
-        </Route>
-        <Route path="/*">
-            {#if auth.user && auth.user.isVerified == "true"}
-                <Dashboard />
-            {:else}
-                <Login />
-            {/if}
-        </Route>
-        <Route path="*">
-            <p>Route not found</p>
-        </Route>
-        <!-- <Route path="/fridge/id"><Fridge {id} /></Route> -->
-    </Router>
+    {#key auth.user}
+        <Router>
+            <Route path="/awaitConfirmSignup">
+                {#if auth.user && auth.user.isVerified == "false"}
+                    <AwaitConfirmSignup />
+                {:else if auth.user && auth.user.isVerified == "true"}
+                    <Dashboard />
+                {:else}
+                    <Login />
+                {/if}
+            </Route>
+            <Route path="/confirmSignup">
+                {#if auth.user && auth.user.isVerified == "true" && !auth.user.displayName}
+                    <ConfirmSignup />
+                {:else if auth.user && auth.user.isVerified == "true" && auth.user.displayName}
+                    <Dashboard />
+                {:else}
+                    <Login />
+                {/if}
+            </Route>
+            <Route path="/*">
+                {#if auth.user && auth.user.isVerified == "true"}
+                    <Dashboard />
+                {:else}
+                    <Login />
+                {/if}
+            </Route>
+            <Route path="*">
+                <p>Route not found</p>
+            </Route>
+            <Route path="/fridge/:id" let:params
+                ><Fridge id={params.id} /></Route
+            >
+        </Router>
+    {/key}
 </div>
 
 <style>

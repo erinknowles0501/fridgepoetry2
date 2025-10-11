@@ -3,12 +3,14 @@
     import { addToast } from "../toasts.svelte.js";
     import { navigate } from "svelte-routing";
 
+    import defaultWords from "../../defaultWords.json";
+    // TODO word sets
+
     let fridgeName = $state("New fridge name");
     let emailToAdd = $state("");
     let emails = $state(["eee", "sdfsdf"]);
-    let words = $state(
-        "Big,Yes,Limnal,Butt,Piranha,Keyboard,Force,Banana,Ghost,Reed,Spectral,Helicopter,Enormous,And,I"
-    );
+
+    let words = $state(defaultWords.toString());
 
     function addEmail() {
         emails.push(emailToAdd);
