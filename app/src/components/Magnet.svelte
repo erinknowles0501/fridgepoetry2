@@ -1,7 +1,5 @@
 <script>
-    //import { draggable } from "@neodrag/svelte";
-
-    let { text, position, element = $bindable() } = $props();
+    let { id, text, position, element = $bindable() } = $props();
 
     let offsetX = position ? position.x : (Math.random() - 0.5) * 5;
     let offsetY = position ? position.y : (Math.random() - 0.5) * 5;
@@ -9,9 +7,10 @@
 
 <div
     class="magnet {position ? 'abs' : ''}"
-    style="top: {offsetX}px; left: {offsetY}px"
+    style="top: {offsetY}px; left: {offsetX}px"
     bind:this={element}
     draggable="true"
+    data-id={id}
 >
     {text}
 </div>

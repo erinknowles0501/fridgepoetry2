@@ -29,7 +29,7 @@
             invitees: emails.map((e) => e.trim()),
         };
 
-        const result = await fetch(`http://localhost:3000/fridge`, {
+        const result = await fetch(import.meta.env.VITE_API_URL + `/fridge`, {
             method: "PUT",
             credentials: "include",
             headers: {

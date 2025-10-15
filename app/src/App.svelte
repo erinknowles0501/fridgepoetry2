@@ -13,7 +13,7 @@
 
     onMount(async () => {
         const result = await (
-            await fetch("http://localhost:3000/auth/check-session", {
+            await fetch(import.meta.env.VITE_API_URL + "/auth/check-session", {
                 method: "GET",
                 credentials: "include",
             })
@@ -32,25 +32,25 @@
     {#key auth.user}
         <Router>
             <Route path="/awaitConfirmSignup">
-                {#if auth.user && auth.user.isVerified == "false"}
+                {#if auth.user && auth.user.isVerified == false}
                     <AwaitConfirmSignup />
-                {:else if auth.user && auth.user.isVerified == "true"}
+                {:else if auth.user && auth.user.isVerified == true}
                     <Dashboard />
                 {:else}
                     <Login />
                 {/if}
             </Route>
             <Route path="/confirmSignup">
-                {#if auth.user && auth.user.isVerified == "true" && !auth.user.displayName}
+                {#if auth.user && auth.user.isVerified == true && !auth.user.displayName}
                     <ConfirmSignup />
-                {:else if auth.user && auth.user.isVerified == "true" && auth.user.displayName}
+                {:else if auth.user && auth.user.isVerified == true && auth.user.displayName}
                     <Dashboard />
                 {:else}
                     <Login />
                 {/if}
             </Route>
             <Route path="/*">
-                {#if auth.user && auth.user.isVerified == "true"}
+                {#if auth.user && auth.user.isVerified == true}
                     <Dashboard />
                 {:else}
                     <Login />

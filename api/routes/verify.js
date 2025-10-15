@@ -10,9 +10,9 @@ router.get('/:token', async (req, res) => {
     console.log('payload', payload);
 
     const newUser = await setEmailVerified(payload.email, true);
-    req.session.user.isVerified = true; // TODO confirm this is needed and works
+    req.session.user.isVerified = true;
 
-    res.redirect(`http://localhost:5173/confirmSignup?user=${newUser.id}&email=${payload.email}`);
+    res.redirect(process.env.APP_URL + `/confirmSignup?user=${newUser.rows[0].id}&email=${payload.email}`);
 });
 
 export default router;

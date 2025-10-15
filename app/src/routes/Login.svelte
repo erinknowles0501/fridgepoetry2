@@ -42,7 +42,8 @@
 
         const result = await (
             await fetch(
-                `http://localhost:3000/auth/${isSigningUp ? "signup" : "login"}`,
+                import.meta.env.VITE_API_URL +
+                    `/auth/${isSigningUp ? "signup" : "login"}`,
                 {
                     method: "POST",
                     credentials: "include",
@@ -71,7 +72,8 @@
 
             const result = await (
                 await fetch(
-                    `http://localhost:3000/invitations/id/${inviteID}`,
+                    import.meta.env.VITE_API_URL +
+                        `/invitations/id/${inviteID}`,
                     {
                         method: "GET",
                         credentials: "include",

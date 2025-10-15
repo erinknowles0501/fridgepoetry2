@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getFridgeWords } from '../models/wordModel.js';
+import { getFridgeWords, moveWord } from '../models/wordModel.js';
 import { isLoggedIn, isOwner, isMember } from '../authorization.js';
 
 const router = Router();
@@ -24,6 +24,18 @@ router.get('/:fridgeID', isLoggedIn, async (req, res) => {
     });
 
     res.json(result);
+});
+
+router.patch('/move/:fridgeWordID', isLoggedIn, async (req, res) => {
+    // TODO
+    // if (!(await isOwner(req.session.user.id, req.params.fridgeID)) && !(await isMember(req.session.user, req.params.fridgeID))) {
+    //     const error = new Error(`User ${req.session.user.id} is not permitted to GET words of fridge ${req.params.fridgeID}`);
+    //     error.status = 403;
+    //     throw error;
+    // }
+
+    const result = await moveWord(req.params.fridgeWordID, req.body.positionX, req.body.positionY, req.session.user.id);
+    return res.json(result);
 });
 
 export default router;

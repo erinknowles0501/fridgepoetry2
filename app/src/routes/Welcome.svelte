@@ -14,7 +14,8 @@
     async function refreshFridges() {
         const fridgesResult = await (
             await fetch(
-                `http://localhost:3000/fridges/list/${currentUser.id}`,
+                import.meta.env.VITE_API_URL +
+                    `/fridges/list/${currentUser.id}`,
                 { credentials: "include" }
             )
         ).json();
@@ -25,7 +26,8 @@
     async function setInvite(status, inviteID) {
         const result = await (
             await fetch(
-                `http://localhost:3000/invitations/${status}/${inviteID}`,
+                import.meta.env.VITE_API_URL +
+                    `/invitations/${status}/${inviteID}`,
                 { credentials: "include" }
             )
         ).json();

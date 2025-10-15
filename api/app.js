@@ -8,7 +8,7 @@ import mountRoutes from './routes/index.js';
 const app = express()
 const port = 3000
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: process.env.APP_URL,
     credentials: true
 }));
 app.use(express.json());
@@ -26,5 +26,5 @@ app.get('/', (req, res) => {
 })
 
 app.listen(port, () => {
-    console.log(`Example app listening on port ${port}: http://localhost:${port}`)
+    console.log(`Example app listening on port ${port}: ${process.env.API_URL}`)
 })

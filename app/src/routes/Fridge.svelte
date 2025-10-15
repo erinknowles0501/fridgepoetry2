@@ -2,6 +2,7 @@
     import { onMount } from "svelte";
     import { Link } from "svelte-routing";
 
+    import { addToast } from "../toasts.svelte.js";
     import Magnet from "../components/Magnet.svelte";
 
     let { id } = $props();
@@ -25,31 +26,29 @@
     let appRef;
     const clientWidth = document.documentElement.clientWidth;
     const clientHeight = document.documentElement.clientHeight;
-    console.log("clientWidth, clientHeight", clientWidth, clientHeight);
 
     onMount(async () => {
         const fridgeResult = await (
-            await fetch(`http://localhost:3000/fridge/${id}`, {
+            await fetch(import.meta.env.VITE_API_URL + `/fridge/${id}`, {
                 method: "GET",
                 credentials: "include",
             })
         ).json();
 
-        console.log("fridge", fridgeResult);
         if (!fridgeResult.failed) {
             fridge = fridgeResult;
         } else addToast(fridgeResult.message);
 
         const wordsResult = await (
-            await fetch(`http://localhost:3000/words/${id}`, {
+            await fetch(import.meta.env.VITE_API_URL + `/words/${id}`, {
                 method: "GET",
                 credentials: "include",
             })
         ).json();
 
-        console.log("words", wordsResult);
         if (!wordsResult.failed) {
             words = wordsResult;
+            console.log("words", words);
         } else addToast(wordsResult.message);
 
         ///
@@ -84,6 +83,7 @@
     });
 
     function onDragStart(event, element) {
+        element.style.opacity = 0;
         currentDrag.offset.x = event.offsetX;
         currentDrag.offset.y = event.offsetY;
 
@@ -152,9 +152,39 @@
 
                 adjustedX = Math.round(adjustedX);
                 adjustedY = Math.round(adjustedY);
+                console.log("adjustedX, adjustedY", adjustedX, adjustedY);
 
                 currentDrag.el.style.top = adjustedY + "px";
                 currentDrag.el.style.left = adjustedX + "px";
+                currentDrag.el.style.opacity = 1;
+
+                console.log("currentDrag", currentDrag);
+
+                fetch(
+                    import.meta.env.VITE_API_URL +
+                        "/words/move/" +
+                        currentDrag.el.getAttribute("data-id"),
+                    {
+                        method: "PATCH",
+                        credentials: "include",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            positionX: adjustedX,
+                            positionY: adjustedY,
+                        }),
+                    }
+                )
+                    .then(async (res) => {
+                        const data = await res.json();
+                        if (!data.failed) {
+                            console.log("data", data);
+                        } else {
+                            addToast(data.message);
+                        }
+                    })
+                    .catch();
 
                 // fridgeRepo
                 //     .updateWord(
@@ -182,6 +212,7 @@
             text={word.text}
             position={word.position}
             bind:element={wordEls[i]}
+            id={word.id}
         />
     {/each}
 </div>

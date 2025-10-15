@@ -24,7 +24,7 @@
         console.log("data", data);
 
         const result = await (
-            await fetch(`http://localhost:3000/user/${userID}`, {
+            await fetch(import.meta.env.VITE_API_URL + `/user/${userID}`, {
                 method: "PATCH",
                 credentials: "include",
                 headers: {

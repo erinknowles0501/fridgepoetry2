@@ -8,7 +8,8 @@
         "test": "node --test",
         "dev": "node app.js",
         "migrate": "node migrations/run.js false migrations/create_tables.sql",
-        "migrate:test": "node migrations/run.js true migrations/create_tables.sql"
+        "migrate:test": "node migrations/run.js true migrations/create_tables.sql",
+        "tunnel": "node tunnel.js"
     },
     "author": "",
     "license": "ISC",
@@ -24,5 +25,8 @@
         "nodemailer": "^7.0.6",
         "pg": "^8.16.3",
         "snake-camel": "^1.0.9"
+    },
+    "devDependencies": {
+        "localtunnel": "^2.0.2"
     }
 }

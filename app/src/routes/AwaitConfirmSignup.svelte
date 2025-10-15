@@ -14,6 +14,7 @@
 
     <p>
         An email has been sent to <b>{auth.user.email}</b> with a link to click to
-        confirm your email so you can finish signing up. You may close this page.
+        confirm your email so you can finish signing up.
     </p>
+    <p>You may close this page.</p>
 </main>

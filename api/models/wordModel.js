@@ -28,8 +28,8 @@ export async function createFridgeWords(wordIDList, fridgeID, db = prodDB) {
     const wordData = wordIDList.map((word) => {
         return {
             id: word.id,
-            position_x: makePosition(350), // TODO: de-magic this. It's 400x600 minus some so words don't spill too much off the screen.
-            position_y: makePosition(550)
+            position_x: makePosition(550), // TODO: de-magic this. It's 400x600 minus some so words don't spill too much off the screen.
+            position_y: makePosition(350)
         }
     });
     // TODO change to uuid or remove
@@ -43,7 +43,16 @@ export async function createFridgeWords(wordIDList, fridgeID, db = prodDB) {
     return result;
 }
 
-// TODO moveFridgeWords
+export async function moveWord(fridgeWordID, positionX, positionY, userID, db = prodDB) {
+    const result = (await db.query(`UPDATE fridge_word SET 
+        position_x = $1, 
+        position_y = $2, 
+        last_moved = NOW(), 
+        last_moved_by = $3
+        WHERE id = $4
+        RETURNING *`, [positionX, positionY, userID, fridgeWordID])).rows[0];
+    return result;
+}
 
 export async function deleteFridgeWordsByFridgeID(fridgeID, db = prodDB) {
     await db.query(`DELETE FROM fridge_word WHERE fridge_id = $1`, [fridgeID]);

@@ -34,8 +34,6 @@ router.post('/login', async (req, res, next) => {
         const user = await loginUser(email, password);
         req.session.regenerate(() => {
             req.session.user = toCamel(user);
-            console.log('req.session.user', req.session.user);
-
             req.session.save(() => {
                 res.json(toCamel(user));
                 // TODO I don't like how I'm returning user.passhash and user.email. 

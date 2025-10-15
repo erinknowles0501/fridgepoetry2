@@ -16,9 +16,12 @@
     let deleteRef;
 
     onMount(async () => {
-        const fridgeResult = await fetch(`http://localhost:3000/fridge/${id}`, {
-            credentials: "include",
-        });
+        const fridgeResult = await fetch(
+            import.meta.env.VITE_API_URL + `/fridge/${id}`,
+            {
+                credentials: "include",
+            }
+        );
         fridge = await fridgeResult.json();
 
         if (fridge.failed) {
@@ -31,7 +34,7 @@
         if (isOwner) await refreshInvitations();
 
         const wordListResult = await (
-            await fetch(`http://localhost:3000/words/${id}`, {
+            await fetch(import.meta.env.VITE_API_URL + `/words/${id}`, {
                 credentials: "include",
             })
         ).json();
@@ -44,9 +47,12 @@
 
     const refreshInvitations = async () => {
         const result = await (
-            await fetch(`http://localhost:3000/invitations/fridge/${id}`, {
-                credentials: "include",
-            })
+            await fetch(
+                import.meta.env.VITE_API_URL + `/invitations/fridge/${id}`,
+                {
+                    credentials: "include",
+                }
+            )
         ).json();
         if (!result.failed) invitations = result;
         else addToast(result.message);
@@ -54,7 +60,7 @@
 
     async function deleteFridge() {
         const result = await (
-            await fetch(`http://localhost:3000/fridge/${id}`, {
+            await fetch(import.meta.env.VITE_API_URL + `/fridge/${id}`, {
                 method: "DELETE",
                 credentials: "include",
                 headers: {
@@ -74,7 +80,7 @@
         };
 
         const result = await (
-            await fetch(`http://localhost:3000/invitations/send`, {
+            await fetch(import.meta.env.VITE_API_URL + `/invitations/send`, {
                 method: "POST",
                 credentials: "include",
                 headers: {

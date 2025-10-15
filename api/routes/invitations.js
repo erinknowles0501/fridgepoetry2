@@ -46,10 +46,10 @@ router.get('/accept/:inviteID', async (req, res) => {
     }
 
     if (invitation.to_type == 'shadow') {
-        res.redirect(`http://localhost:5173/login?invite=${req.params.inviteID}&status=accept`);
+        res.redirect(process.env.APP_URL + `/login?invite=${req.params.inviteID}&status=accept`);
     } else {
         const result = await setInvitation(req.params.inviteID, 'ACCEPTED');
-        if (req.query.redirect == 'true') res.redirect(`http://localhost:5173`);
+        if (req.query.redirect == 'true') res.redirect(process.env.APP_URL);
         else res.json(result);
     }
 });
