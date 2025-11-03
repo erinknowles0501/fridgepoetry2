@@ -13,7 +13,7 @@ router.get('/id/:id', async (req, res) => {
 });
 
 router.get('/user/:userID', isLoggedIn, async (req, res) => {
-    if (!(await isCurrentUser(req.session.user, req.params.userID))) {
+    if (!(isCurrentUser(req.session.user, req.params.userID))) {
         const error = new Error(`User ${req.session.user.id} is not permitted to GET invitations of user ${req.params.userID}`);
         error.status = 403;
         throw error;
@@ -35,7 +35,6 @@ router.get('/fridge/:fridgeID', isLoggedIn, async (req, res) => {
 });
 
 router.get('/accept/:inviteID', async (req, res) => {
-    // TODO: If to shadow user, redirect to frontend /login&invite={id}&status=accept. Carry the invite throughout and once signed up, accept/decline.
     const invitation = await getInvitationByID(req.params.inviteID);
     console.log('invitation', invitation);
 
@@ -69,7 +68,7 @@ router.get('/decline/:inviteID', isLoggedIn, async (req, res) => {
 });
 
 router.post('/send', isLoggedIn, async (req, res) => {
-    if (!(await isCurrentUser(req.session.user, req.body.fromID))) {
+    if (!(isCurrentUser(req.session.user, req.body.fromID))) {
         const error = new Error(`Can not send invitation from a different user. Tried to send as: ${req.body.fromID}. You: ${req.session.user.id}`);
         error.status = 403;
         throw error;

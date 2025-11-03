@@ -17,21 +17,37 @@
 
     let loginRef;
 
+    function signupValid() {
+        if (password !== confirmPassword) {
+            addToast("Passwords do not match!");
+            return false;
+        }
+
+        if (password.length < 10 || password.length > 100) {
+            addToast(
+                "Password should be at least 10 characters and no more than 100."
+            );
+            return false;
+        }
+    }
+
+    function loginValid() {
+        if (!password || !email) {
+            addToast("Missing email or password");
+            return false;
+        } else return true;
+    }
+
     async function onsubmit(e) {
         e.preventDefault();
 
-        // TODO validation
-        if (isSigningUp && password != confirmPassword) {
-            addToast("Passwords do not match!");
+        if (loginValid() === false || (isSigningUp && signupValid() === false))
             return;
-        }
 
         const data = {
             email: email,
             password: password,
         };
-
-        // if (inviteID && isSigningUp) data.invite = inviteID;
 
         let navigateString = isSigningUp ? "/awaitConfirmSignup" : "/";
         navigateString +=
@@ -83,8 +99,8 @@
             ).json();
 
             if (!result.failed) {
-                email = data.to_email;
-                console.log("current user", data);
+                email = result.to_email;
+                console.log("current user", result);
             } else {
                 addToast(result.message);
             }
@@ -97,6 +113,12 @@
 </header>
 
 <main>
+    {#if inviteID && isSigningUp}
+        <div class="message">
+            <span class="material-symbols-outlined"> info </span>
+            Sign up to accept the invitation :)
+        </div>
+    {/if}
     <form {onsubmit}>
         <label for="email">Email:</label>
         <input
@@ -145,7 +167,7 @@
 
 <style>
     form {
-        width: 400px;
+        width: 400px; /* TODO mobile sizing */
     }
 
     input[type="email"],
@@ -159,5 +181,12 @@
         justify-content: space-between;
         align-items: baseline;
         margin-top: 2em;
+    }
+
+    .message {
+        background: #ddd; /* TODO light-dark */
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        width: 400px;
     }
 </style>

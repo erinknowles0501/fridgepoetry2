@@ -10,18 +10,34 @@ router.post('/signup', async (req, res, next) => {
 
         if (!email || !password) {
             const error = new Error('Email and password required');
-            error.status = 401; // TODO
+            error.status = 401;
+            throw error;
+        }
+
+        if (password.length < 10 || password.length > 100) {
+            const error = new Error('Password bad length - should be at least 10 characters and no more than 100.');
+            error.status = 401;
             throw error;
         }
 
         const user = await signupUser(email, password);
-        req.session.regenerate(() => {
-            req.session.user = toCamel(user);
-        });
-        req.session.user = toCamel(user);
-        // TODO I don't like how I'm returning user.passhash and user.email. 
+        const camelUser = {
+            id: user.id,
+            email: user.email, // TODO Don't love that I'm returning this
+            isVerified: user.is_verified,
+            emailID: user.email_id,
+            createdAt: user.created_at,
+            displayName: user.display_name,
+            color: user.color,
+            notifications: user.notifications
+        }
 
-        res.status(201).json(toCamel(user));
+        req.session.regenerate(() => {
+            req.session.user = camelUser;
+            req.session.save(() => {
+                res.status(201).json(camelUser);
+            });
+        });
     } catch (err) {
         next(err);
     }
@@ -32,11 +48,21 @@ router.post('/login', async (req, res, next) => {
         const { email, password } = req.body;
 
         const user = await loginUser(email, password);
+        const camelUser = {
+            id: user.id,
+            email: user.email, // TODO Don't love that I'm returning this
+            isVerified: user.is_verified,
+            emailID: user.email_id,
+            createdAt: user.created_at,
+            displayName: user.display_name,
+            color: user.color,
+            notifications: user.notifications
+        } // TODO DRY this up. It's used here twice and in PATCH /user
+
         req.session.regenerate(() => {
-            req.session.user = toCamel(user);
+            req.session.user = camelUser;
             req.session.save(() => {
-                res.json(toCamel(user));
-                // TODO I don't like how I'm returning user.passhash and user.email. 
+                res.json(camelUser);
             });
         });
     } catch (err) {

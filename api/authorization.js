@@ -29,8 +29,8 @@ export default session({
 
 // TODO: isOwnerMiddleware, isOwnerOrMemberMiddleware, isCurrentUserMiddleware Both of those are used often enough in pretty much exactly the same way. Have to look into it, but I think it would be handy to be able to call them in other ways too from within routes that aren't using them the standard way.
 
-export async function isLoggedIn(req, res, next) {
-    if (req.session.user && req.session.user.isVerified == 'true') return next();
+export function isLoggedIn(req, res, next) {
+    if (req.session.user && req.session.user.isVerified == true) return next();
     else {
         const error = new Error('Not logged in or email not verified');
         error.status = 401;
@@ -71,13 +71,9 @@ export async function hasAnyInvitationToFridge(userID, fridgeID) {
     return !!invitation;
 }
 
-export async function isCurrentUser(sessionUser, userID) {
+export function isCurrentUser(sessionUser, userID) {
     if (sessionUser.id == userID) return true;
-    else {
-        const error = new Error(`Current user (${sessionUser.id}) does not match needed userID (${userID})`);
-        error.status = 403;
-        throw error;
-    }
+    else return false;
 }
 
 // export function isAnyOf(...middlewares) {

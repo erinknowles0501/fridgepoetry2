@@ -51,7 +51,6 @@ export async function createInvitation(toEmail, fromID, fridgeID, db = prodDB) {
 
         table = 'invitation_to_unknown';
         userID = existingShadowUser.id;
-
     }
 
     console.log('database, userID', table, userID);
@@ -62,7 +61,6 @@ export async function createInvitation(toEmail, fromID, fridgeID, db = prodDB) {
     console.log('invite', invite);
 
     return invite;
-
 }
 
 export async function deleteInvitationsByFridgeID(fridgeID, db = prodDB) {

@@ -32,7 +32,7 @@ export async function createFridgeWords(wordIDList, fridgeID, db = prodDB) {
             position_y: makePosition(350)
         }
     });
-    // TODO change to uuid or remove
+
     const result = (await db.query(`INSERT INTO fridge_word (fridge_id, word_id, position_x, position_y)
         SELECT
             $1,

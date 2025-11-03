@@ -1,7 +1,9 @@
 import prodDB from '../db.js';
 import { createWordsIfNotExist, getWordIDsFromList, createFridgeWords, deleteFridgeWordsByFridgeID } from './wordModel.js';
 import { deleteSettingByFridgeID } from './settingModel.js';
-import { deleteInvitationsByFridgeID } from './invitationModel.js';
+import { deleteInvitationsByFridgeID, createInvitation } from './invitationModel.js';
+import { sendInvitation } from '../services/mailService.js';
+import { getUserByID } from './userModel.js';
 
 export async function getFridgeByID(id, db = prodDB) {
     const result = await db.query(`SELECT * FROM fridge WHERE id = $1`, [id]);
@@ -15,7 +17,6 @@ export async function updateFridge(id, body, db = prodDB) {
 }
 
 export async function createFridge(body, db = prodDB) {
-    // TODO Invite the list of invitees
     // TODO Let creator change their default settings on fridge create.
     let fridge;
 
@@ -28,13 +29,24 @@ export async function createFridge(body, db = prodDB) {
         await createWordsIfNotExist(body.wordList);
         const wordIDs = await getWordIDsFromList(body.wordList);
         const fridgeWords = await createFridgeWords(wordIDs, fridge.id);
+
+        for (let invitee of body.invitees) {
+            const invitation = await createInvitation(invitee, body.ownerID, fridge.id);
+            invitation.fridgeName = body.name;
+            invitation.fromDisplayName = (await getUserByID(body.ownerID)).display_name;
+
+            sendInvitation(invitee, invitation);
+        }
         await db.query('COMMIT;');
     } catch (e) {
-        console.log('e', e);
         await db.query('ROLLBACK;');
+
+        const error = new Error(`Error while creating fridge: ${e.message}`);
+        error.status = 500;
+        throw error;
     }
 
-    return !!fridge; // TODO Error handling!?!?
+    return fridge;
 }
 
 export async function deleteFridge(id, db = prodDB) {
@@ -50,9 +62,12 @@ export async function deleteFridge(id, db = prodDB) {
         await db.query('COMMIT;');
         success = true;
     } catch (e) {
-        console.log('e', e);
         await db.query('ROLLBACK;');
         success = false;
+
+        const error = new Error(`Error while deleting fridge: ${e.message}`);
+        error.status = 500;
+        throw error;
     }
 
     return success;

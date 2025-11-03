@@ -12,7 +12,7 @@ router.get('/:token', async (req, res) => {
     const newUser = await setEmailVerified(payload.email, true);
     req.session.user.isVerified = true;
 
-    res.redirect(process.env.APP_URL + `/confirmSignup?user=${newUser.rows[0].id}&email=${payload.email}`);
+    res.redirect(process.env.APP_URL + `/confirmSignup?user=${req.session.user.id}&email=${payload.email}`);
 });
 
 export default router;

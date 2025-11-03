@@ -5,14 +5,39 @@
 
     import defaultWords from "../../defaultWords.json";
     // TODO word sets
+    // TODO word chips
 
     let fridgeName = $state("New fridge name");
     let emailToAdd = $state("");
-    let emails = $state(["eee", "sdfsdf"]);
+    let emails = $state(["eee@eee.com", "sdfsdf@sdfsdf.com"]);
 
     let words = $state(defaultWords.toString());
+    let wordsArray = $derived(
+        words
+            .split(",")
+            .map((w) => w.trim())
+            .filter((w) => w.length > 0)
+    );
 
     function addEmail() {
+        // This is really permissive, but that's fine for the frontend for now.
+        if (!emailToAdd.includes("@") || !emailToAdd.includes(".")) {
+            addToast("Invalid email address syntax.");
+            return;
+        }
+        if (
+            emails
+                .map((e) => e.toLowerCase())
+                .includes(emailToAdd.toLowerCase())
+        ) {
+            addToast("This email is already in the invitation list.");
+            return;
+        }
+        if (emailToAdd == auth.user.email) {
+            addToast("Cannot invite yourself.");
+            return;
+        }
+
         emails.push(emailToAdd);
         emailToAdd = "";
     }
@@ -21,11 +46,25 @@
         emails = emails.filter((e) => e != email);
     }
 
+    function valid() {
+        if (!fridgeName) {
+            addToast("Missing fridge name.");
+            return false;
+        }
+        if (!words.length || !wordsArray.length) {
+            addToast("Missing words.");
+            return false;
+        }
+        return true;
+    }
+
     async function createFridge() {
+        if (valid() === false) return;
+
         const data = {
             ownerID: auth.user.id,
             name: fridgeName,
-            wordList: words.split(",").map((w) => w.trim()),
+            wordList: wordsArray,
             invitees: emails.map((e) => e.trim()),
         };
 

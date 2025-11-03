@@ -2,6 +2,7 @@
     import { navigate } from "svelte-routing";
     import { auth } from "../state.svelte.js";
     import SetNameAndColor from "../components/SetNameAndColor.svelte";
+    import { addToast } from "../toasts.svelte.js";
 
     auth.user.isVerified = true;
 
@@ -13,15 +14,27 @@
     const email = params.get("email");
     const userID = params.get("user");
 
+    function valid() {
+        if (!displayName) {
+            addToast("Missing display name.");
+            return false;
+        }
+        if (!password) {
+            addToast("Please re-enter your password to confirm your identity.");
+            return false;
+        }
+        return true;
+    }
+
     async function submit() {
+        if (valid() === false) return;
+
         const data = {
             displayName,
             color: currentColor,
             email,
             password,
         };
-
-        console.log("data", data);
 
         const result = await (
             await fetch(import.meta.env.VITE_API_URL + `/user/${userID}`, {
@@ -33,9 +46,10 @@
                 body: JSON.stringify(data),
             })
         ).json();
+        console.log("result", result);
+
         if (!result.failed) {
-            const user = await result.json();
-            auth.user = user;
+            auth.user = result;
             navigate("/", { replace: true });
         } else {
             addToast(result.message);
