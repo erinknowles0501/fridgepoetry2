@@ -3,8 +3,9 @@
     import { Link } from "svelte-routing";
     import { auth } from "../state.svelte.js";
     import { addToast } from "../toasts.svelte.js";
+    import { DateTime } from "luxon";
 
-    let fridges = $state([]); // TODO sort by pending invites first, then lastChanged
+    let fridges = $state([]);
     let currentUser = auth.user;
 
     onMount(async () => {
@@ -34,6 +35,10 @@
         if (!result.failed) await refreshFridges();
         else addToast(result.message);
     }
+
+    function formatDate(date) {
+        return DateTime.fromISO(date).toRelative();
+    }
 </script>
 
 <div class="title-wrap">
@@ -46,7 +51,11 @@
         <div class="card {fridge.status == 'PENDING' ? 'pending' : ''}">
             <div class="details">
                 <h3>{fridge.name}</h3>
-                <div>Last changed</div>
+                {#if fridge.status == "PENDING"}
+                    <div>Sent {formatDate(fridge.created_at)}</div>
+                {:else}
+                    <div>Last changed {formatDate(fridge.last_changed)}</div>
+                {/if}
             </div>
             <div
                 class="card-action-wrap {fridge.status == 'PENDING'
