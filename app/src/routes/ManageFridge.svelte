@@ -3,6 +3,7 @@
     import { onMount } from "svelte";
     import { auth } from "../state.svelte.js";
     import { addToast } from "../toasts.svelte.js";
+    import { DateTime } from "luxon";
 
     let { id } = $props();
     let fridge = $state({});
@@ -91,10 +92,29 @@
         ).json();
 
         if (!result.failed) {
+            newInviteEmail = "";
             await refreshInvitations();
         } else {
             addToast(result.message);
         }
+    }
+
+    async function revokeInvite(invite) {
+        const result = await (
+            await fetch(
+                import.meta.env.VITE_API_URL +
+                    `/invitations/revoke/${invite.id}`,
+                {
+                    method: "DELETE",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            )
+        ).json();
+        if (!result.failed) refreshInvitations();
+        else addToast(result.message);
     }
 
     $effect(() => {
@@ -110,33 +130,15 @@
 </script>
 
 <div>
-    <p>Manage Fridge {id}!</p>
-
     {#if fridge.name}
         <div>
             {fridge.name} <br />
-            {fridge.id}<br />
-            {fridge.lastChanged}
+            {fridge.id}
         </div>
 
         {#if isOwner}
             <div>
                 <h3>Invitations</h3>
-
-                <div class="invitations-wrap">
-                    {#each invitations as invitation}
-                        <div
-                            class="invitation {invitation.status.toLowerCase()}"
-                        >
-                            <p class="invite-to">{invitation.to}</p>
-                            <p class="sent-on">{invitation.createdAt}</p>
-                            <p class="status">{invitation.status}</p>
-                            {#if invitation.status == "PENDING"}<a href="/">
-                                    Revoke
-                                </a>{/if}
-                        </div>
-                    {/each}
-                </div>
 
                 <div>
                     <input type="email" bind:value={newInviteEmail} /><input
@@ -145,13 +147,41 @@
                         onclick={() => sendInvite()}
                     />
                 </div>
+
+                <div class="invitations-wrap">
+                    {#each invitations as invitation}
+                        <div
+                            class="invitation {invitation.status.toLowerCase()}"
+                        >
+                            <p class="invite-to">{invitation.to}</p>
+                            <p class="sent-on">
+                                {DateTime.fromISO(
+                                    invitation.createdAt
+                                ).toRelative()}
+                            </p>
+                            <p class="status">{invitation.status}</p>
+                            {#if invitation.status == "PENDING"}<a
+                                    href="#"
+                                    onclick={() => revokeInvite(invitation)}
+                                >
+                                    Revoke
+                                </a>{/if}
+                        </div>
+                    {/each}
+                </div>
             </div>
         {/if}
 
         <div>
             <h3>Word list</h3>
-            {wordList.map((word) => word.text)}
+            <div class="word-list-wrap">
+                {#each wordList.map((word) => word.text) as word}
+                    <div>{word}</div>
+                {/each}
+            </div>
         </div>
+
+        <br /><br />
 
         {#if isOwner}
             <div>
@@ -175,16 +205,20 @@
         {/if}
     {/if}
 
+    <br /><br />
+
     <Link to="/">Back to dashboard</Link>
+
+    <br /><br />
 </div>
 
 <style>
     .invitations-wrap {
         display: grid;
         min-width: 300px;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
         gap: 1rem;
-        margin-bottom: 1rem;
+        margin-top: 1rem;
     }
 
     .invitation {
@@ -200,6 +234,9 @@
 
     .invitation .invite-to {
         font-weight: 500;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
     }
 
     .invitation .status {
@@ -219,5 +256,13 @@
         background: var(--lightbordercolor);
         border: 3px dashed var(--bordercolor);
         color: var(--lighttextcolor);
+    }
+
+    .word-list-wrap div {
+        display: inline-block;
+        background: var(--lightbordercolor);
+        padding: 0 0.3rem;
+        margin: 0.2rem;
+        border-radius: 0.3rem;
     }
 </style>

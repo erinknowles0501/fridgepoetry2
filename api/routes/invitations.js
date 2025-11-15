@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getInvitationByID, getInvitationsByFridge, getOpenInvitationsByUser, setInvitation, createInvitation } from "../models/invitationModel.js";
+import { getInvitationByID, getInvitationsByFridge, getOpenInvitationsByUser, setInvitation, createInvitation, revokeInvitation } from "../models/invitationModel.js";
 import { isLoggedIn, isCurrentUser, isOwner, hasAnyInvitationToFridge } from "../authorization.js";
 import { sendInvitation } from "../services/mailService.js";
 import { getFridgeByID, getFridgeUsersToDisplay } from "../models/fridgeModel.js";
@@ -36,7 +36,6 @@ router.get('/fridge/:fridgeID', isLoggedIn, async (req, res) => {
 
 router.get('/accept/:inviteID', async (req, res) => {
     const invitation = await getInvitationByID(req.params.inviteID);
-    console.log('invitation', invitation);
 
     if (!invitation || invitation.status !== 'PENDING') {
         const error = new Error(`Could not accept: Invitation ${req.params.inviteID} not found or not pending`);
@@ -55,7 +54,7 @@ router.get('/accept/:inviteID', async (req, res) => {
 
 router.get('/decline/:inviteID', isLoggedIn, async (req, res) => {
     // TODO update to match /accept
-    // TODO look into DRYing this up with /handle/:id&status=accept/decline or whatever
+    // TODO look into DRYing this up (and revoke) with /handle/:id&status=accept/decline or whatever
     const invitation = await getInvitationByID(req.params.inviteID);
     if (!invitation || invitation.to_id !== req.session.user.id || invitation.status !== 'PENDING') {
         const error = new Error(`Could not decline: Invitation ${req.params.inviteID} not found or not to user ${req.session.user.id} or not pending`);
@@ -65,6 +64,25 @@ router.get('/decline/:inviteID', isLoggedIn, async (req, res) => {
 
     const result = await setInvitation(req.params.inviteID, 'DECLINED');
     res.json(result);
+});
+
+router.delete('/revoke/:inviteID', isLoggedIn, async (req, res) => {
+    const invitation = await getInvitationByID(req.params.inviteID);
+
+    if (!invitation || invitation.status !== 'PENDING') {
+        const error = new Error(`Could not revoke: Invitation ${req.params.inviteID} not found or not pending`);
+        error.status = 403;
+        throw error;
+    }
+
+    if (invitation.from_id !== req.session.user.id) {
+        const error = new Error(`Could not revoke: Invitation ${req.params.inviteID} not sent by current user (${req.session.user.id})`);
+        error.status = 403;
+        throw error;
+    }
+
+    await revokeInvitation(req.params.inviteID);
+    res.json({ success: true }); // TODO: standardize this. If it fails it auto returns error. 
 });
 
 router.post('/send', isLoggedIn, async (req, res) => {
@@ -90,11 +108,18 @@ router.post('/send', isLoggedIn, async (req, res) => {
     }
 
     if ((existingUser && await hasAnyInvitationToFridge(existingUser.id, req.body.fridgeID)) || (existingShadowUser && await hasAnyInvitationToFridge(existingShadowUser.id, req.body.fridgeID))) {
-        const error = new Error(`Can not send invitation: invited user (${req.body.toEmail} is already invited to this fridge (${req.body.fridgeID}). They may have accepted or declined, or it may still be pending.`);
+        const error = new Error(`Can not send invitation: invited user (${req.body.toEmail}) is already invited to this fridge (${req.body.fridgeID}). They may have accepted or declined, or it may still be pending.`);
         error.status = 403;
         throw error;
     }
-    // TODO check fridge not at capacity
+
+    const FRIDGE_MAX_INVITED = 20; // Invited, not total - the owner does not count towards this! WARNING: you'll have trouble here if you ever allow changing fridge owner ie to somebody who's been invited :)
+    const invitedToFridge = (await getInvitationsByFridge(req.body.fridgeID)).filter(i => i.status === 'ACCEPTED' || i.status === 'PENDING');
+    if (invitedToFridge.length >= FRIDGE_MAX_INVITED) {
+        const error = new Error(`Can not send invitation: this fridge (${req.body.fridgeID}) is already at user capacity (${FRIDGE_MAX_INVITED}). Note that both PENDING and ACCEPTED invitations count toward fridge user capacity.`);
+        error.status = 403;
+        throw error;
+    }
 
     const fridge = await getFridgeByID(req.body.fridgeID);
     const fromUsers = await getFridgeUsersToDisplay(req.body.fridgeID); // TODO Owner-only version?

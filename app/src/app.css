@@ -169,15 +169,15 @@ button.secondary:hover {
 .card-action-wrap {
     display: flex;
     border-top: 3px solid var(--bordercolor);
-    text-align: center;
+    justify-content: space-between;
+    padding: 0 0.3rem;
 }
 
 .card-action-wrap a {
-    width: 50%;
     border: 0;
     font-weight: 500;
     font-size: 0.8em;
-    padding: 0.4em;
+    padding: 0.4rem 0.2rem;
     text-decoration: none;
 }
 

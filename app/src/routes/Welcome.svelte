@@ -48,14 +48,16 @@
 
 <div class="card-grid">
     {#each fridges as fridge}
-        <div class="card {fridge.status == 'PENDING' ? 'pending' : ''}">
+        <div class="fridge card {fridge.status == 'PENDING' ? 'pending' : ''}">
             <div class="details">
                 <h3>{fridge.name}</h3>
-                {#if fridge.status == "PENDING"}
-                    <div>Sent {formatDate(fridge.created_at)}</div>
-                {:else}
-                    <div>Last changed {formatDate(fridge.last_changed)}</div>
-                {/if}
+                <div class="last-changed">
+                    {#if fridge.status == "PENDING"}
+                        Sent <b>{formatDate(fridge.created_at)}</b>
+                    {:else}
+                        Last changed <b>{formatDate(fridge.last_changed)}</b>
+                    {/if}
+                </div>
             </div>
             <div
                 class="card-action-wrap {fridge.status == 'PENDING'
@@ -85,6 +87,17 @@
 </div>
 
 <style>
+    .card.fridge {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .card.fridge h3 {
+        font-size: 1.05rem;
+        line-height: 1.05rem;
+    }
+
     .title-wrap {
         display: flex;
         justify-content: flex-start;
@@ -102,5 +115,9 @@
 
     .card-action-wrap.pending {
         border-top: 3px dashed var(--lightbordercolor);
+    }
+
+    .last-changed {
+        font-size: 0.7rem;
     }
 </style>

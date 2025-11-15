@@ -69,19 +69,24 @@ export async function deleteInvitationsByFridgeID(fridgeID, db = prodDB) {
     const resultUnknown = await db.query(`DELETE FROM invitation_to_unknown WHERE fridge_id = $1`, [fridgeID]);
 }
 
+export async function revokeInvitation(inviteID, db = prodDB) {
+    const resultUserInvitations = await db.query(`DELETE FROM user_invitation WHERE id = $1`, [inviteID]);
+    const resultUnknown = await db.query(`DELETE FROM invitation_to_unknown WHERE id = $1`, [inviteID]);
+}
+
 export async function getInvitationsByFridge(fridgeID, db = prodDB) {
     // Also returns DECLINED for reasons of not re-inviting someone who has declined an invite.
 
-    const emailResult = await db.query(`SELECT to_id, invitation_to_unknown.created_at, email, status FROM invitation_to_unknown 
+    const emailResult = await db.query(`SELECT invitation_to_unknown.id, to_id, invitation_to_unknown.created_at, email, status FROM invitation_to_unknown 
     INNER JOIN shadow_user ON invitation_to_unknown.to_id = shadow_user.id
     WHERE fridge_id = $1`, [fridgeID]);
-    const userResult = await db.query(`SELECT to_id, user_invitation.created_at, email, status FROM user_invitation 
+    const userResult = await db.query(`SELECT user_invitation.id, to_id, user_invitation.created_at, email, status FROM user_invitation 
     INNER JOIN users ON user_invitation.to_id = users.id
     INNER JOIN email ON users.email_id = email.id
     WHERE fridge_id = $1`, [fridgeID]);
 
     const result = [...emailResult.rows, ...userResult.rows].map(invite => {
-        return { to: invite.email, createdAt: invite.created_at, status: invite.status }
+        return { id: invite.id, to: invite.email, createdAt: invite.created_at, status: invite.status }
     });
     return result;
 }
