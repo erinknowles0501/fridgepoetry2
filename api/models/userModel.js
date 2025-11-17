@@ -38,7 +38,7 @@ export async function createUser(body, db = prodDB) {
         // If shadow user exists (ie, if this email has been invited before) convert the invitations to user_invitations.
         // Invitations cannot be accepted or declined until the user exists, so they can only be PENDING (or SENDING, once the invitation service is up).
         // TODO: What happens when an invitation is revoked? Is there logic here to check for whether there's any pending invites,
-        // or is there logic in invitation_revoke to destroy the shadow_user if it has no more invites?
+        // or is there logic in invitation_revoke to destroy the shadow_user if it has no more invites? Or do we just keep the shadow user?
         const shadowUser = (await db.query(`SELECT * from shadow_user WHERE email = $1`, [body.email])).rows[0];
         if (shadowUser) {
             const userInvitations = (await db.query(`INSERT INTO user_invitation (fridge_id, from_id, to_id, status)

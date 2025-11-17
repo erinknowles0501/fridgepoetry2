@@ -31,8 +31,7 @@ CREATE TABLE IF NOT EXISTS fridge_word (
   last_moved_by UUID,
   FOREIGN KEY (fridge_id) REFERENCES fridge(id),
   FOREIGN KEY (word_id) REFERENCES word(id),
-  FOREIGN KEY (last_moved_by) REFERENCES users(id),
-  UNIQUE (fridge_id, word_id)
+  FOREIGN KEY (last_moved_by) REFERENCES users(id)
 );
 
 CREATE TABLE IF NOT EXISTS email (

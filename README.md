@@ -2,10 +2,11 @@
 
 ## Details for quickly catching myself up:
 
--   There is API documentation (./apidocs/reference)
+-   There is API documentation (./apidocs/reference). It's a bit out of date.
 -   You used an app called Pencil to do a map of the app flow. (./mvp_flow.epgz)
--   You have designs in Figma.
--   There's a bit of a Postman collection going, under your ek@pm account locally.
+-   You have (most) designs in Figma.
+-   There's a bit of a Postman collection going, under your ek@pm account locally. This is more complete.
+-   In comments - TODO indicates something to be done. WARNING indicates "planned features and changes may affect this".
 
 D: \00_software\postgres\pgAdmin 4\runtime > psql.exe -d postgres -U postgres
 
@@ -172,3 +173,6 @@ and     // no number = 1 copy of word
 -   Frontend - JWT - restricted routing
 -   HTTPS
 -   Rate limiting for backend (especially anything with emails)
+-   Refactor invitation_to_unknown and user_invitation into one table
+-   Update error messages so details don't show - for example, "User (# ${userid}) not found" is the error message, and the frontend strips anything within (# ).
+-   Move to camelcase id - ie, userId instead of userID. Mostly so toCamel and toSnake work as expected without patching.

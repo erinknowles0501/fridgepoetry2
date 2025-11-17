@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { getInvitationByID, getInvitationsByFridge, getOpenInvitationsByUser, setInvitation, createInvitation, revokeInvitation } from "../models/invitationModel.js";
 import { isLoggedIn, isCurrentUser, isOwner, hasAnyInvitationToFridge } from "../authorization.js";
-import { sendInvitation } from "../services/mailService.js";
+import { inviteSender } from "../services/mailService.js";
 import { getFridgeByID, getFridgeUsersToDisplay } from "../models/fridgeModel.js";
 import { getShadowUserByEmail, getUserByEmail } from "../models/userModel.js";
 
@@ -132,7 +132,7 @@ router.post('/send', isLoggedIn, async (req, res) => {
     invitation.fromDisplayName = fromUser.display_name;
 
     // TODO: Before jobs queue - just call a function that progressively-backoff tries to call this 3 times. Set to FAILED if failed after that.
-    sendInvitation(req.body.toEmail, invitation);
+    inviteSender(req.body.toEmail, invitation);
 
     res.json(invitation);
 });

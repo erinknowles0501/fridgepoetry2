@@ -17,7 +17,9 @@ export async function createWordsIfNotExist(wordList, db = prodDB) {
 }
 
 export async function getWordIDsFromList(wordList, db = prodDB) {
-    const result = (await db.query(`SELECT id FROM word WHERE text = ANY($1::text[])`, [wordList])).rows;
+    const result = (await db.query(`SELECT word.id
+        FROM unnest($1::text[]) WITH ORDINALITY AS u(text, ordinality)
+        JOIN word ON word.text = u.text`, [wordList])).rows;
     return result;
 }
 

@@ -2,7 +2,7 @@ import prodDB from '../db.js';
 import { createWordsIfNotExist, getWordIDsFromList, createFridgeWords, deleteFridgeWordsByFridgeID } from './wordModel.js';
 import { deleteSettingByFridgeID } from './settingModel.js';
 import { deleteInvitationsByFridgeID, createInvitation } from './invitationModel.js';
-import { sendInvitation } from '../services/mailService.js';
+import { inviteSender } from '../services/mailService.js';
 import { getUserByID } from './userModel.js';
 
 export async function getFridgeByID(id, db = prodDB) {
@@ -35,7 +35,7 @@ export async function createFridge(body, db = prodDB) {
             invitation.fridgeName = body.name;
             invitation.fromDisplayName = (await getUserByID(body.ownerID)).display_name;
 
-            sendInvitation(invitee, invitation);
+            inviteSender(invitee, invitation);
         }
         await db.query('COMMIT;');
     } catch (e) {
